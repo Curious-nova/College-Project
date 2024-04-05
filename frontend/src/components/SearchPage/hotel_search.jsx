@@ -107,7 +107,6 @@ export const Hotel = () => {
       </Navbar>
       <div style={{ background: "#ebe7e7", paddingTop: "50px" }}>
         <SmallBottom />
-        <Bottom />
       </div>
       {error && <p>Error: {error}</p>}
       {hotelData && <SearchBox handle={handleSearch} />} {/* Update according to your UI */}

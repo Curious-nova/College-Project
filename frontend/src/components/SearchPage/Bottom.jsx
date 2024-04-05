@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const Style = styled.div`
@@ -70,9 +70,22 @@ const BookButton = styled.button`
   &:hover {
     background-color: #800080;
   }
+ 
+`;
+
+const Loader = styled.div`
+  text-align: center;
 `;
 
 export const Bottom = ({ data, bookData }) => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (data && data.flightOffers) {
+      setLoading(false);
+    }
+  }, [data]);
+
   const handleBookNow = (flightData) => {
     bookData(flightData);
   };
@@ -83,48 +96,67 @@ export const Bottom = ({ data, bookData }) => {
   };
 
   return (
-    console.log(data),
-    <Style>
-      {data?.flightOffers?.map((flightOffer) => (
-        <FlightBox key={nanoid(6)}>
-          <FlightDetails>
-            <DetailsContent>
-              <AirlineLogo
-                src={flightOffer.segments[0].legs[0].carriersData[0].logo}
-                alt={flightOffer.segments[0].legs[0].carriersData[0].name}
-              />
-              <FlightInfo>
-                <p>
-                  <strong>Departure:</strong>{" "}
-                  {formatDate(flightOffer.segments[0].departureTime)} IST
-                </p>
-                <p>
-                  <strong>Arrival:</strong>{" "}
-                  {formatDate(flightOffer.segments[0].arrivalTime)} IST
-                </p>
-                <p>
-                  <strong>Airline:</strong>{" "}
-                  {flightOffer.segments[0].legs[0].carriersData[0].name}
-                </p>
-              </FlightInfo>
-            </DetailsContent>
-          </FlightDetails>
-          <FlightPrice>
-            <Price>
-              Price: {flightOffer.priceBreakdown.total.units}{" "}
-              {flightOffer.priceBreakdown.total.currencyCode}
-            </Price>
-            <BookButton onClick={() => handleBookNow(flightOffer)}>
-              <Link
-                to="/checkout"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Book Now
-              </Link>
-            </BookButton>
-          </FlightPrice>
-        </FlightBox>
-      ))}
-    </Style>
+    <>
+      {loading && (
+        <Loader>
+          <div
+            className="d-flex justify-content-center"
+            style={{ marginTop: "180px", marginBottom: "20px" }}
+          >
+            <div
+              className="spinner-border spinner-border-lg"
+              role="status"
+            ></div>
+          </div>
+          <div>
+            <span className="sr-only">Searching for Flights ...</span>
+          </div>
+        </Loader>
+      )}
+      {!loading && (
+        <Style>
+          {data?.flightOffers?.map((flightOffer) => (
+            <FlightBox key={nanoid(6)}>
+              <FlightDetails>
+                <DetailsContent>
+                  <AirlineLogo
+                    src={flightOffer.segments[0].legs[0].carriersData[0].logo}
+                    alt={flightOffer.segments[0].legs[0].carriersData[0].name}
+                  />
+                  <FlightInfo>
+                    <p>
+                      <strong>Departure:</strong>{" "}
+                      {formatDate(flightOffer.segments[0].departureTime)} IST
+                    </p>
+                    <p>
+                      <strong>Arrival:</strong>{" "}
+                      {formatDate(flightOffer.segments[0].arrivalTime)} IST
+                    </p>
+                    <p>
+                      <strong>Airline:</strong>{" "}
+                      {flightOffer.segments[0].legs[0].carriersData[0].name}
+                    </p>
+                  </FlightInfo>
+                </DetailsContent>
+              </FlightDetails>
+              <FlightPrice>
+                <Price>
+                  Price: {flightOffer.priceBreakdown.total.units}{" "}
+                  {flightOffer.priceBreakdown.total.currencyCode}
+                </Price>
+                <BookButton onClick={() => handleBookNow(flightOffer)}>
+                  <Link
+                    to="/checkout"
+                    style={{ textDecoration: "none", color: "inherit" }}
+                  >
+                    Book Now
+                  </Link>
+                </BookButton>
+              </FlightPrice>
+            </FlightBox>
+          ))}
+        </Style>
+      )}
+    </>
   );
 };

@@ -9,7 +9,13 @@ const PaymentContainer = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 50px;
-  background: linear-gradient(to right, #8f92fa 0%, #6165f0 25%, #6c70eb 50%, #3339e9 100%);
+  background: linear-gradient(
+    to right,
+    #8f92fa 0%,
+    #6165f0 25%,
+    #6c70eb 50%,
+    #3339e9 100%
+  );
   min-height: 100vh;
 `;
 
@@ -140,13 +146,13 @@ export const PaymentPage = () => {
     setLoading(true);
     console.log("Payment started...");
     // Dummy payment process, can be replaced with actual payment gateway integration
+
     setTimeout(() => {
       setLoading(false);
       setPaymentCompleted(true);
       console.log("Payment completed!");
     }, 3000); // Simulating a 3-second payment process
   };
-  
 
   useEffect(() => {
     if (!loading && paymentCompleted) {
@@ -156,7 +162,7 @@ export const PaymentPage = () => {
       console.log("Sound played!");
     }
   }, [loading, paymentCompleted]);
-  
+
   return (
     <PaymentContainer>
       <CompanyNameLogo>
@@ -173,6 +179,13 @@ export const PaymentPage = () => {
       {loading ? (
         <SectionContainer>
           <Subtitle>Processing Payment</Subtitle>
+          <Subtitle className="d-flex justify-content-center align-items-center flex-column mt-5">
+            <div class="spinner-border mt-2" role="status"></div>
+
+            <div>
+              <span class="sr-only">Payment Processing ...</span>
+            </div>
+          </Subtitle>
           <ProcessingIcon />
         </SectionContainer>
       ) : (
@@ -181,14 +194,19 @@ export const PaymentPage = () => {
             <PaymentDoneContainer>
               <PaymentDoneImage src={paymentdone} alt="Payment Done" />
               <PaymentDoneText>Payment Successful!</PaymentDoneText>
-              <AdditionalText>Your booking is confirmed. Thank you for choosing BookMyTrip.</AdditionalText>
+              <AdditionalText>
+                Your booking is confirmed. Thank you for choosing BookMyTrip.
+              </AdditionalText>
             </PaymentDoneContainer>
           ) : (
-            <Button onClick={handlePayment}>Complete Payment</Button>
+            <Button  onClick={handlePayment}>Complete Payment</Button>
           )}
         </>
       )}
-      <Link to="/" style={{ textDecoration: "none", color: "inherit", marginTop: "20px" }}>
+      <Link
+        to="/"
+        style={{ textDecoration: "none", color: "white" , marginTop: "20px" }}
+      >
         Back to Home
       </Link>
     </PaymentContainer>

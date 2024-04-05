@@ -41,6 +41,7 @@ const Style = styled.div`
         align-items: center;
 
         p {
+          height: 12px;
           font-size: 18px;
           font-weight: 600;
           color: #2c98f1;

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from 'axios';
 import { Header } from "../HomePage/Header";
 import { Navbar } from "../HomePage/Navbar";
 import { Icondiv } from "../HomePage/Icondiv";
 import { Bookingcss } from "../HomePage/Bookingcss";
 //import { Fromto } from "./Fromtoom";
 import { FareTypes } from "../HomePage/FareTypes";
-import { Bottom } from "./Bottom";
+import { Bottom } from "../HomePage/Bottom";
 import { Login } from "../login/Login";
 import { Link, useHistory } from "react-router-dom";
 import { SmallBottom } from "../HomePage/SmallBottom";
-import bmtLogo from "./bmt_logo.jpg";
+import bmtLogo from './bmt_logo.jpg';
 import { SearchBox } from "../SearchPage/SearchBox";
-import { Fromto } from "../HomePage/Fromtoom";
+import {Fromto} from "../HomePage/Fromtoom"
 
 export const TrainBooking = () => {
   const [dataa, setData] = useState([]);
@@ -22,7 +22,7 @@ export const TrainBooking = () => {
     from: "",
     to: "",
     departureDate: "",
-    travelClass: "", // Added travelClass to the state
+    travelClass: "" // Added travelClass to the state
   });
 
   const [trainData, setTrainData] = useState(null);
@@ -49,13 +49,13 @@ export const TrainBooking = () => {
 
   const searchTrains = async ({ from, to, departureDate, travelClass }) => {
     const options = {
-      method: "GET",
-      url: "https://irctc1.p.rapid, api.com/api/v1/searchStation",
+      method: 'GET',
+      url: 'https://irctc1.p.rapid, api.com/api/v1/searchStation',
       params: { from, to, departureDate, travelClass },
       headers: {
-        "X-RapidAPI-Key": "4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46",
-        "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
-      },
+        'X-RapidAPI-Key': '4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46',
+        'X-RapidAPI-Host': 'irctc1.p.rapidapi.com'
+      }
     };
 
     try {
@@ -80,12 +80,7 @@ export const TrainBooking = () => {
           throw new Error("No data found in localStorage");
         }
         const { from, to, departureDate, travelClass } = JSON.parse(storedData);
-        const trainData = await searchTrains({
-          from,
-          to,
-          departureDate,
-          travelClass,
-        }); // Use searchTrains function
+        const trainData = await searchTrains({ from, to, departureDate, travelClass }); // Use searchTrains function
         setData(trainData.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -98,6 +93,7 @@ export const TrainBooking = () => {
     return () => {
       // Clean-up function to handle component unmount
     };
+
   }, []);
 
   return (
@@ -105,13 +101,17 @@ export const TrainBooking = () => {
       <Header></Header>
       <Navbar>
         <div className="topdiv">
-          <img className="laltain" src="" alt="" />
+          <img
+            className="laltain"
+            src=""
+            alt=""
+          />
           <Link to="/">
-            <img
+            <img 
               src={bmtLogo}
               className="mmtlogo"
               alt="Logo"
-              style={{ width: "130px", height: "80px", paddingTop: "20px" }}
+              style={{width: '130px', height: '80px', paddingTop: '20px'}}
             />
           </Link>
         </div>
@@ -120,16 +120,19 @@ export const TrainBooking = () => {
           <Fromto handleChange={handleChange} />
         </Bookingcss>
         <div className="button">
-          <button onClick={handleSearch}>SEARCH</button>
+          <button onClick={handleSearch}>
+            SEARCH
+          </button>
         </div>
       </Navbar>
       <div style={{ background: "#ebe7e7", paddingTop: "50px" }}>
         <SmallBottom />
         <Bottom />
       </div>
-      {error && <p>Error: {error}</p>}
+      {/* {error && <p>Error: {error}</p>}
       {trainData && <SearchBox handle={handleSearch} />}
-      <Bottom data={dataa} bookData={bookData} />
+      <Bottom data={dataa} bookData={bookData} /> */}
     </div>
+    
   );
 };

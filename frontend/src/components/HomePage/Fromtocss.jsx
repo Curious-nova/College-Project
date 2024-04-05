@@ -14,7 +14,7 @@ grid-template-columns: 1fr 1fr;
 }
 h3{
     position : relative;
-    top: -15px;
+    top: -20px;
     left: 12px;
     font-size: 16px;
     font-weight: 500;
