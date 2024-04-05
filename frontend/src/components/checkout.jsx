@@ -165,6 +165,8 @@ export const Checkout = () => {
         <Input disabled value={`Arrival: ${formatDateTime(selectedFlight?.segments[0]?.arrivalTime)}`} />
         <Input disabled value={`Airline: ${selectedFlight?.segments[0]?.legs[0]?.carriersData[0]?.name}`} />
         <Input disabled value={`Price: ${selectedFlight?.priceBreakdown.total.units} INR`} />
+        <Input disabled value={`Carry-On Baggage: 7Kgs`}/>
+        <Input disabled value={`Check-In Baggage: 25Kgs`}/>
       </SectionContainer>
       <SectionContainer>
         <Subtitle>Traveller Details</Subtitle>

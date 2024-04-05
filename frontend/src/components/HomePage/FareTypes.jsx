@@ -23,7 +23,7 @@ const Style = styled.div`
     line-height: 14px;
     /* padding: 8px 8px 8px 26px; */
     height: 100%;
-    text-align: left;
+    text-align: center;
   }
   .div {
     align-items: center;

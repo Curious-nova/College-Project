@@ -49,9 +49,9 @@ const Text = styled.p`
 `;
 
 const Button = styled.button`
-  width: 100%;
+  width: 30%;
   padding: 15px 20px;
-  background-color: #1d56ff;
+  background-color: #cc0621d9;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -60,7 +60,7 @@ const Button = styled.button`
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #024677;
+    background-color: #8f1111;
   }
 `;
 

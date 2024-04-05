@@ -21,7 +21,7 @@ h3{
 }
 .fromtodiv div{
     border-right: 0.01em solid #d4d0d0;
-    height:82%;
+    height:100%;
 }
 .fromtodiv select {
     padding:4%;
@@ -30,7 +30,7 @@ h3{
     font-weight:bold;
     border: none;
     position : relative;
-    top: -25px;
+    top: -18px;
     -webkit-appearance: none;
   -moz-appearance: none;
   text-indent: 1px;
@@ -39,7 +39,7 @@ h3{
 .fromtodiv2 {
     display:grid;
     grid-template-columns: 1fr 1fr 1fr;
-    height: 87%;
+    height: 100%;
 }
 .date{
     border:none;
@@ -48,7 +48,7 @@ h3{
 }
 .fromtodiv2 div{
     border-right: 0.01em solid #d4d0d0;
-    height:89%;
+    height:100%;
 }
 .fromtodiv2 select {
     padding:4%;
@@ -57,7 +57,7 @@ h3{
     font-weight:bold;
     border: none;
     position : relative;
-    top: -19px;
+    top: -16px;
     -webkit-appearance: none;
   -moz-appearance: none;
   text-indent: 1px;
