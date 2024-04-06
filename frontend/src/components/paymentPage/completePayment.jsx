@@ -145,15 +145,53 @@ export const PaymentPage = () => {
   const handlePayment = () => {
     setLoading(true);
     console.log("Payment started...");
-    // Dummy payment process, can be replaced with actual payment gateway integration
-
-    setTimeout(() => {
+    
+    // Get traveler data from local storage
+    const travelerData = JSON.parse(localStorage.getItem("travellers"));
+  
+    // Send traveler data to backend
+    fetch('http://localhost:8082/storeTravelerDetails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ travelers: travelerData })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to store traveler details');
+      }
+      console.log('Traveler details stored successfully');
+      // Get flight data from local storage
+      const flightData = JSON.parse(localStorage.getItem("buy"));
+      // Include travelers key in flightData object
+      flightData.travelers = travelerData;
+      // Send flight data to backend
+      return fetch('http://localhost:8081/storeFlightDetails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(flightData),
+      });
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to store flight details');
+      }
+      console.log('Flight details stored successfully');
+      setTimeout(() => {
+        setLoading(false);
+        setPaymentCompleted(true);
+        console.log("Payment completed!");
+      }, 3000); // Retaining the 3-second delay
+    })
+    .catch(error => {
+      console.error('Error:', error);
       setLoading(false);
-      setPaymentCompleted(true);
-      console.log("Payment completed!");
-    }, 3000); // Simulating a 3-second payment process
+    });
   };
-
+  
   useEffect(() => {
     if (!loading && paymentCompleted) {
       // Play sound effect upon completion of payment process
