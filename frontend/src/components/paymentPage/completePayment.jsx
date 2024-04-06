@@ -145,17 +145,23 @@ export const PaymentPage = () => {
   const handlePayment = () => {
     setLoading(true);
     console.log("Payment started...");
-
+  
     // Get traveler data from local storage
     const travelerData = JSON.parse(localStorage.getItem("travellers"));
-
+    const userId = JSON.parse(localStorage.getItem("userId")); // Get the userId from localStorage
+    // Add userId to each traveler object
+    const travelersWithUserId = travelerData.map((traveler) => ({
+      ...traveler,
+      user_id: userId,
+    }));
+  
     // Send traveler data to backend
     fetch("http://localhost:8080/storeTravelerDetails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ travelers: travelerData }),
+      body: JSON.stringify({ travelers: travelersWithUserId }), // Send travelers with userId
     })
       .then((response) => {
         if (!response.ok) {
@@ -166,6 +172,7 @@ export const PaymentPage = () => {
         const flightData = JSON.parse(localStorage.getItem("buy"));
         // Include travelers key in flightData object
         flightData.travelers = travelerData;
+        flightData.user_id = userId; // Add userId to flightData
         // Send flight data to backend
         return fetch("http://localhost:8080/storeFlightDetails", {
           method: "POST",
@@ -191,6 +198,7 @@ export const PaymentPage = () => {
         setLoading(false);
       });
   };
+  
 
   useEffect(() => {
     if (!loading && paymentCompleted) {

@@ -26,7 +26,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "ash1006@",
   database: "travel_booking_system",
   authPlugin: "mysql_native_password",
 });
@@ -153,7 +153,7 @@ app.post("/storeFlightDetails", (req, res) => {
   const departure_city = flightData.segments[0].departureAirport.cityName;
   const departure_time = flightData.segments[0].departureTime;
   const airline = flightData.segments[0].legs[0].carriersData[0].name; // Assuming the first carrier as the airline
-  const register_id = localStorage.getItem("userId");
+  const register_id = flightData.user_id;
   const sql =
     "INSERT INTO booked_flights (register_id, arrival, arrival_city, arrival_time, departure, departure_city, departure_time, airline, price, num_travelers, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   const values = [
@@ -183,14 +183,15 @@ app.post("/storeFlightDetails", (req, res) => {
 // Route to store traveler details
 app.post("/storeTravelerDetails", (req, res) => {
   const travelers = req.body.travelers;
+  
 
   // Prepare SQL query
-  const sql = "INSERT INTO travellers (name, age, gender) VALUES (?, ?, ?)";
+  const sql = "INSERT INTO travellers ( register_id ,name, age, gender ) VALUES ( ?, ?, ?, ?)";
 
   // Insert each traveler into the database
   travelers.forEach((traveler) => {
-    const { name, age, gender } = traveler;
-    const values = [name, age, gender];
+    const { user_id, name, age, gender } = traveler;
+    const values = [ user_id ,name, age, gender];
     db.query(sql, values, (err, result) => {
       if (err) {
         console.log(err);
