@@ -90,11 +90,25 @@ export const Main = () => {
             />
           </Link>
           {auth ? (
-            <div className="logout">
-              <button onClick={handleLogout} className="btn btn-danger">
-                Logout
-              </button>
-            </div>
+            <>
+              <div className="d-flex justify-content-center align-items-end">
+                <button className="btn">
+                  <Link to="/user">
+                    <img
+                      className="rounded-circle mt-5"
+                      width="40px"
+                      src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"
+                      alt="Profile"
+                    />
+                  </Link>
+                </button>
+              </div>
+              <div className="logout">
+                <button onClick={handleLogout} className="btn btn-danger">
+                  Logout
+                </button>
+              </div>
+            </>
           ) : (
             <>
               <div className="login">

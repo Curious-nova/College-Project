@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
- export const Login = () => {
+export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ import { useNavigate, Link } from "react-router-dom";
       .then((res) => {
         if (res.data.status === "success") {
           navigate("/");
+          localStorage.setItem("userId", res.data.userId);
         } else {
           console.error("Login failed"); // Handle failed login
           alert("Failed to login");

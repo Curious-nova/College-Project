@@ -14,6 +14,7 @@ import { Cab } from "./components/SearchPage/cab";
 import { Bus } from "./components/SearchPage/bus_search";
 import { HolidayPackages } from "./components/SearchPage/holiday";
 import ProtectedRoutes from "./components/ProtectedRoute/ProtectedRoutes";
+import UserProfile from "./components/UserProfile/UserProfile";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/login" exact element={<Login />}></Route>
         <Route path="/" exact element={<Main />} />
         <Route element={<ProtectedRoutes />}>
+          <Route path="/user" exact element={<UserProfile />} />
           <Route path="/search" exact element={<Search />} />
           <Route path="/checkout" exact element={<Checkout />}></Route>
 

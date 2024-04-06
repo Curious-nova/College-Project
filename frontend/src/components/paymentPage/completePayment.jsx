@@ -145,53 +145,53 @@ export const PaymentPage = () => {
   const handlePayment = () => {
     setLoading(true);
     console.log("Payment started...");
-    
+
     // Get traveler data from local storage
     const travelerData = JSON.parse(localStorage.getItem("travellers"));
-  
+
     // Send traveler data to backend
-    fetch('http://localhost:8082/storeTravelerDetails', {
-      method: 'POST',
+    fetch("http://localhost:8080/storeTravelerDetails", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ travelers: travelerData })
+      body: JSON.stringify({ travelers: travelerData }),
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to store traveler details');
-      }
-      console.log('Traveler details stored successfully');
-      // Get flight data from local storage
-      const flightData = JSON.parse(localStorage.getItem("buy"));
-      // Include travelers key in flightData object
-      flightData.travelers = travelerData;
-      // Send flight data to backend
-      return fetch('http://localhost:8081/storeFlightDetails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(flightData),
-      });
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to store flight details');
-      }
-      console.log('Flight details stored successfully');
-      setTimeout(() => {
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to store traveler details");
+        }
+        console.log("Traveler details stored successfully");
+        // Get flight data from local storage
+        const flightData = JSON.parse(localStorage.getItem("buy"));
+        // Include travelers key in flightData object
+        flightData.travelers = travelerData;
+        // Send flight data to backend
+        return fetch("http://localhost:8080/storeFlightDetails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(flightData),
+        });
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to store flight details");
+        }
+        console.log("Flight details stored successfully");
+        setTimeout(() => {
+          setLoading(false);
+          setPaymentCompleted(true);
+          console.log("Payment completed!");
+        }, 3000); // Retaining the 3-second delay
+      })
+      .catch((error) => {
+        console.error("Error:", error);
         setLoading(false);
-        setPaymentCompleted(true);
-        console.log("Payment completed!");
-      }, 3000); // Retaining the 3-second delay
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      setLoading(false);
-    });
+      });
   };
-  
+
   useEffect(() => {
     if (!loading && paymentCompleted) {
       // Play sound effect upon completion of payment process
@@ -237,13 +237,13 @@ export const PaymentPage = () => {
               </AdditionalText>
             </PaymentDoneContainer>
           ) : (
-            <Button  onClick={handlePayment}>Complete Payment</Button>
+            <Button onClick={handlePayment}>Complete Payment</Button>
           )}
         </>
       )}
       <Link
         to="/"
-        style={{ textDecoration: "none", color: "white" , marginTop: "20px" }}
+        style={{ textDecoration: "none", color: "white", marginTop: "20px" }}
       >
         Back to Home
       </Link>

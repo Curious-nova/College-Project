@@ -65,7 +65,7 @@ app.post("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
   const sql = "SELECT * FROM register where email=?";
-  db.query(sql, req.body.email, (err, data) => {
+  db.query(sql, [req.body.email], (err, data) => {
     if (err) {
       return res.json({ Error: "Failed to login" });
     } else if (data.length > 0) {
@@ -77,14 +77,13 @@ app.post("/login", (req, res) => {
             return res.json({ Error: "Internal Error" });
           }
           if (result) {
-            // Check 'result' instead of 'res'
             const username = data[0].username;
             const token = jwt.sign({ username }, process.env.SECRET_KEY, {
               expiresIn: "1d",
             });
             res.cookie("token", token);
             console.log(token);
-            return res.json({ status: "success" });
+            return res.json({ status: "success", userId: data[0].id }); // Add userId to the response
           } else {
             return res.json({ Error: "Bad Credentials" });
           }
@@ -112,13 +111,114 @@ const verifyUser = (req, res, next) => {
   }
 };
 app.get("/", verifyUser, (req, res) => {
-  return res.json({ status: "success", name: req.username });
+  const username = req.username;
+  const sql = "SELECT * FROM register WHERE username = ?";
+  db.query(sql, [username], (err, data) => {
+    if (err) {
+      console.error("Error fetching user details:", err);
+      return res.status(500).json({ error: "Failed to fetch user details" });
+    }
+    if (data.length > 0) {
+      const userDetails = {
+        id: data[0].id,
+        name: data[0].username,
+        email: data[0].email,
+      };
+      return res.json({ status: "success", ...userDetails });
+    } else {
+      return res.status(404).json({ error: "User not found" });
+    }
+  });
 });
 
 app.get("/logout", (req, res) => {
   res.clearCookie("token");
   return res.json({ status: "success" });
 });
+
+// Flight details
+
+// Route to store flight details
+app.post("/storeFlightDetails", (req, res) => {
+  const flightData = req.body;
+  const travelerData = flightData.travelers; // Get travelers array from request body
+  const num_travelers = travelerData.length; // Number of travelers
+  const price = flightData.priceBreakdown.total.units; // Assuming price in INR
+  const total_price = price * num_travelers; // Calculate total price
+
+  const arrival = flightData.segments[0].arrivalAirport.name;
+  const arrival_city = flightData.segments[0].arrivalAirport.cityName;
+  const arrival_time = flightData.segments[0].arrivalTime;
+  const departure = flightData.segments[0].departureAirport.name;
+  const departure_city = flightData.segments[0].departureAirport.cityName;
+  const departure_time = flightData.segments[0].departureTime;
+  const airline = flightData.segments[0].legs[0].carriersData[0].name; // Assuming the first carrier as the airline
+  const register_id = localStorage.getItem("userId");
+  const sql =
+    "INSERT INTO booked_flights (register_id, arrival, arrival_city, arrival_time, departure, departure_city, departure_time, airline, price, num_travelers, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  const values = [
+    register_id,
+    arrival,
+    arrival_city,
+    arrival_time,
+    departure,
+    departure_city,
+    departure_time,
+    airline,
+    price,
+    num_travelers,
+    total_price,
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ Error: "Failed to store flight details" });
+    } else {
+      return res.json({ status: "success" });
+    }
+  });
+});
+
+// Route to store traveler details
+app.post("/storeTravelerDetails", (req, res) => {
+  const travelers = req.body.travelers;
+
+  // Prepare SQL query
+  const sql = "INSERT INTO travellers (name, age, gender) VALUES (?, ?, ?)";
+
+  // Insert each traveler into the database
+  travelers.forEach((traveler) => {
+    const { name, age, gender } = traveler;
+    const values = [name, age, gender];
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.json({ Error: "Failed to store traveler details" });
+      }
+    });
+  });
+
+  return res.json({ status: "success" });
+});
+
+// fetching user bookings
+// Route to fetch booking flight details by user id
+app.get("/booking-flights/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const sql = "SELECT * FROM booked_flights WHERE register_id = ?";
+  db.query(sql, [userId], (err, data) => {
+    if (err) {
+      console.error("Error fetching booking flight details:", err);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch booking flight details" });
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
 app.listen(
   process.env.PORT || 8080,
   console.log(`server running on port ${process.env.PORT}`)
