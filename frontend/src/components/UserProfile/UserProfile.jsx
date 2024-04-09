@@ -1,35 +1,32 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+import { FaBookOpen } from "react-icons/fa";
 
 function UserProfile() {
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
-  const [bookingFlights, setBookingFlights] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch user details
     axios
       .get("http://localhost:8080/")
       .then((res) => {
-        const userData = res.data;
-        setUserName(userData.name);
-        setEmail(userData.email);
+        console.log("User details response:", res.data); // Log the response data
+        setUserName(res.data.name);
+        setEmail(res.data.email);
+        setLoading(false); // Set loading to false after data is fetched
       })
       .catch((err) => {
         console.error("Error fetching user details:", err);
+        setLoading(false); // Set loading to false on error
       });
+  }, [userName, email]); // Include userName and email in the dependency array
 
-    // Fetch booking flights
-    const userId = localStorage.getItem("userId");
-    axios
-      .get(`http://localhost:8080/booking-flights/${userId}`)
-      .then((res) => {
-        setBookingFlights(res.data);
-      })
-      .catch((err) => {
-        console.error("Error fetching booking flights:", err);
-      });
-  }, []);
+  if (loading) {
+    return <div>Loading...</div>; // Display loading indicator while fetching data
+  }
 
   return (
     <div className="container rounded bg-white mt-5 mb-5">
@@ -50,16 +47,18 @@ function UserProfile() {
           <div className="p-3 py-5">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h4 className="text-right">Profile Settings</h4>
-            </div>
-            <div>
-              <h5>Booking Flights:</h5>
-              <ul>
-                {bookingFlights.map((flight) => (
-                  <li key={flight.id}>
-                    Flight Details: {flight.departure} to {flight.arrival}
-                  </li>
-                ))}
-              </ul>
+
+              <Link to="/bookings">
+                <button
+                  className="btn"
+                  style={{ backgroundColor: "purple", color: "white" }}
+                >
+                  <span className="me-2">
+                    <FaBookOpen />
+                  </span>
+                  My Bookings
+                </button>
+              </Link>
             </div>
           </div>
         </div>

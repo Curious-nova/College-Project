@@ -17,6 +17,8 @@ import { Login } from "../login/Login";
 import bmtLogo from "./bmt_logo.jpg";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { IoMdLogOut } from "react-icons/io";
+import { FaSearch } from "react-icons/fa";
 
 export const Main = () => {
   const [data, setData] = useState({
@@ -105,6 +107,9 @@ export const Main = () => {
               </div>
               <div className="logout">
                 <button onClick={handleLogout} className="btn btn-danger">
+                  <span>
+                    <IoMdLogOut />
+                  </span>{" "}
                   Logout
                 </button>
               </div>
@@ -139,7 +144,13 @@ export const Main = () => {
         </Bookingcss>
         <div className="button">
           <button onClick={addLocal}>
-            <Link to="/search">SEARCH</Link>
+            <Link to="/search">
+              {" "}
+              <span>
+                <FaSearch />
+              </span>{" "}
+              SEARCH
+            </Link>
           </button>
         </div>
       </Navbar>

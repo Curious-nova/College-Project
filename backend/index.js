@@ -27,7 +27,7 @@ app.use(cookieParser());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "ash1006@",
+  password: "",
   database: "travel_booking_system",
   authPlugin: "mysql_native_password",
 });
@@ -59,15 +59,34 @@ const generateFlightTicketPDF = (ticketData) => {
       // Add flight details section
       doc.fontSize(16).text("Flight Details", { underline: true }).moveDown();
       doc.fontSize(12).text(`Airline: ${ticketData.flight.airline}`).moveDown();
-      doc.fontSize(12).text(`Departure: ${ticketData.flight.departure} (${ticketData.flight.departure_city})`).moveDown();
-      doc.fontSize(12).text(`Departure Time: ${ticketData.flight.departure_time}`).moveDown();
-      doc.fontSize(12).text(`Arrival: ${ticketData.flight.arrival} (${ticketData.flight.arrival_city})`).moveDown();
-      doc.fontSize(12).text(`Arrival Time: ${ticketData.flight.arrival_time}`).moveDown();
+      doc
+        .fontSize(12)
+        .text(
+          `Departure: ${ticketData.flight.departure} (${ticketData.flight.departure_city})`
+        )
+        .moveDown();
+      doc
+        .fontSize(12)
+        .text(`Departure Time: ${ticketData.flight.departure_time}`)
+        .moveDown();
+      doc
+        .fontSize(12)
+        .text(
+          `Arrival: ${ticketData.flight.arrival} (${ticketData.flight.arrival_city})`
+        )
+        .moveDown();
+      doc
+        .fontSize(12)
+        .text(`Arrival Time: ${ticketData.flight.arrival_time}`)
+        .moveDown();
 
       // Add travelers details section
       doc.fontSize(16).text("Travelers", { underline: true }).moveDown();
       ticketData.travelers.forEach((traveler, index) => {
-        doc.fontSize(12).text(`Traveler ${index + 1}:`).moveDown();
+        doc
+          .fontSize(12)
+          .text(`Traveler ${index + 1}:`)
+          .moveDown();
         doc.fontSize(12).text(`Name: ${traveler.name}`).moveDown();
         doc.fontSize(12).text(`Age: ${traveler.age}`).moveDown();
         doc.fontSize(12).text(`Gender: ${traveler.gender}`).moveDown();
@@ -75,18 +94,45 @@ const generateFlightTicketPDF = (ticketData) => {
       });
 
       // Add baggage details section
-      doc.fontSize(16).text("Baggage Allowance", { underline: true }).moveDown();
-      doc.fontSize(12).text(`Carry-on Baggage Weight: ${ticketData.flight.carryon_baggage_weight} kg`).moveDown();
-      doc.fontSize(12).text(`Checked Baggage Weight: ${ticketData.flight.checkin_baggage_weight} kg`).moveDown();
+      doc
+        .fontSize(16)
+        .text("Baggage Allowance", { underline: true })
+        .moveDown();
+      doc
+        .fontSize(12)
+        .text(
+          `Carry-on Baggage Weight: ${ticketData.flight.carryon_baggage_weight} kg`
+        )
+        .moveDown();
+      doc
+        .fontSize(12)
+        .text(
+          `Checked Baggage Weight: ${ticketData.flight.checkin_baggage_weight} kg`
+        )
+        .moveDown();
 
       // Add total price section
       doc.fontSize(16).text("Total Price", { underline: true }).moveDown();
-      doc.fontSize(12).text(`Price per traveler: ${ticketData.flight.price} INR`).moveDown();
-      doc.fontSize(12).text(`Number of Travelers: ${ticketData.flight.num_travelers}`).moveDown();
-      doc.fontSize(12).text(`Total Price: ${ticketData.flight.total_price} INR`).moveDown();
+      doc
+        .fontSize(12)
+        .text(`Price per traveler: ${ticketData.flight.price} INR`)
+        .moveDown();
+      doc
+        .fontSize(12)
+        .text(`Number of Travelers: ${ticketData.flight.num_travelers}`)
+        .moveDown();
+      doc
+        .fontSize(12)
+        .text(`Total Price: ${ticketData.flight.total_price} INR`)
+        .moveDown();
 
       // Add footer with thank you message
-      doc.fontSize(12).text("Thank you for choosing our airline! We look forward to serving you on your upcoming flight.").moveDown();
+      doc
+        .fontSize(12)
+        .text(
+          "Thank you for choosing our airline! We look forward to serving you on your upcoming flight."
+        )
+        .moveDown();
 
       // Finalize the PDF document
       doc.end();
@@ -100,13 +146,12 @@ const generateFlightTicketPDF = (ticketData) => {
   });
 };
 
-
-
 // Flight Ticket Generator function
 const generateAndDownloadTicket = async (userId) => {
   try {
     // Query database to retrieve flight and traveler data
-    const flightDataQuery = "SELECT * FROM booked_flights WHERE register_id = ?";
+    const flightDataQuery =
+      "SELECT * FROM booked_flights WHERE register_id = ?";
     const travelerDataQuery = "SELECT * FROM travellers WHERE register_id = ?";
     const [flightData, travelerData] = await Promise.all([
       queryPromise(flightDataQuery, [userId]),
@@ -286,7 +331,8 @@ app.post("/storeTravelerDetails", (req, res) => {
   const travelers = req.body.travelers;
 
   // Prepare SQL query
-  const sql = "INSERT INTO travellers (register_id, name, age, gender) VALUES (?, ?, ?, ?)";
+  const sql =
+    "INSERT INTO travellers (register_id, name, age, gender) VALUES (?, ?, ?, ?)";
 
   // Insert each traveler into the database
   travelers.forEach((traveler) => {
@@ -310,21 +356,23 @@ app.get("/booking-flights/:userId", (req, res) => {
   db.query(sql, [userId], (err, data) => {
     if (err) {
       console.error("Error fetching booking flight details:", err);
-      return res.status(500).json({ error: "Failed to fetch booking flight details" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch booking flight details" });
     } else {
       return res.json(data);
     }
   });
 });
 
-const path = require('path');
+const path = require("path");
 
 // Route to generate and download flight ticket PDF
 app.get("/generate-and-download-ticket/:userId", (req, res) => {
   const userId = req.params.userId;
   generateAndDownloadTicket(userId)
     .then((pdfPath) => {
-      const fileName = 'flight_ticket.pdf'; // File name for the downloaded PDF
+      const fileName = "flight_ticket.pdf"; // File name for the downloaded PDF
 
       // Read the file contents
       fs.readFile(pdfPath, (err, data) => {
@@ -333,8 +381,11 @@ app.get("/generate-and-download-ticket/:userId", (req, res) => {
           res.status(500).json({ error: "Failed to read flight ticket PDF" });
         } else {
           // Set headers to force browser to download the file as an attachment
-          res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${fileName}"`
+          );
+          res.setHeader("Content-Type", "application/pdf");
 
           // Send the file data as a response
           res.send(data);
@@ -349,8 +400,6 @@ app.get("/generate-and-download-ticket/:userId", (req, res) => {
       res.status(500).json({ error: "Failed to generate flight ticket PDF" });
     });
 });
-
-
 
 app.listen(
   process.env.PORT || 8080,
