@@ -5,6 +5,8 @@ const mysql = require("mysql");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const fs = require("fs");
+const PDFDocument = require("pdfkit");
 
 const salt = 10;
 dotenv.config();
@@ -19,7 +21,6 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.json());
 
 //DB connection
 
@@ -38,6 +39,108 @@ db.connect((err) => {
     console.log("DB connected successfully");
   }
 });
+
+// PDF Generator function
+const generateFlightTicketPDF = (ticketData) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument();
+
+      // Set up PDF stream
+      const pdfPath = `flight_ticket.pdf`;
+      const pdfStream = fs.createWriteStream(pdfPath);
+
+      // Pipe the PDF document to the file stream
+      doc.pipe(pdfStream);
+
+      // Add title
+      doc.fontSize(20).text("Flight Ticket", { align: "center" }).moveDown();
+
+      // Add flight details section
+      doc.fontSize(16).text("Flight Details", { underline: true }).moveDown();
+      doc.fontSize(12).text(`Airline: ${ticketData.flight.airline}`).moveDown();
+      doc.fontSize(12).text(`Departure: ${ticketData.flight.departure} (${ticketData.flight.departure_city})`).moveDown();
+      doc.fontSize(12).text(`Departure Time: ${ticketData.flight.departure_time}`).moveDown();
+      doc.fontSize(12).text(`Arrival: ${ticketData.flight.arrival} (${ticketData.flight.arrival_city})`).moveDown();
+      doc.fontSize(12).text(`Arrival Time: ${ticketData.flight.arrival_time}`).moveDown();
+
+      // Add travelers details section
+      doc.fontSize(16).text("Travelers", { underline: true }).moveDown();
+      ticketData.travelers.forEach((traveler, index) => {
+        doc.fontSize(12).text(`Traveler ${index + 1}:`).moveDown();
+        doc.fontSize(12).text(`Name: ${traveler.name}`).moveDown();
+        doc.fontSize(12).text(`Age: ${traveler.age}`).moveDown();
+        doc.fontSize(12).text(`Gender: ${traveler.gender}`).moveDown();
+        doc.moveDown();
+      });
+
+      // Add baggage details section
+      doc.fontSize(16).text("Baggage Allowance", { underline: true }).moveDown();
+      doc.fontSize(12).text(`Carry-on Baggage Weight: ${ticketData.flight.carryon_baggage_weight} kg`).moveDown();
+      doc.fontSize(12).text(`Checked Baggage Weight: ${ticketData.flight.checkin_baggage_weight} kg`).moveDown();
+
+      // Add total price section
+      doc.fontSize(16).text("Total Price", { underline: true }).moveDown();
+      doc.fontSize(12).text(`Price per traveler: ${ticketData.flight.price} INR`).moveDown();
+      doc.fontSize(12).text(`Number of Travelers: ${ticketData.flight.num_travelers}`).moveDown();
+      doc.fontSize(12).text(`Total Price: ${ticketData.flight.total_price} INR`).moveDown();
+
+      // Add footer with thank you message
+      doc.fontSize(12).text("Thank you for choosing our airline! We look forward to serving you on your upcoming flight.").moveDown();
+
+      // Finalize the PDF document
+      doc.end();
+
+      // Resolve with the path to the generated PDF
+      resolve(pdfPath);
+    } catch (error) {
+      // Reject if an error occurs during PDF generation
+      reject(error);
+    }
+  });
+};
+
+
+
+// Flight Ticket Generator function
+const generateAndDownloadTicket = async (userId) => {
+  try {
+    // Query database to retrieve flight and traveler data
+    const flightDataQuery = "SELECT * FROM booked_flights WHERE register_id = ?";
+    const travelerDataQuery = "SELECT * FROM travellers WHERE register_id = ?";
+    const [flightData, travelerData] = await Promise.all([
+      queryPromise(flightDataQuery, [userId]),
+      queryPromise(travelerDataQuery, [userId]),
+    ]);
+
+    // Format data for PDF generation
+    const ticketData = {
+      flight: flightData[0], // Assuming there's only one flight associated with the register_id
+      travelers: travelerData,
+    };
+
+    // Generate PDF
+    const pdfPath = await generateFlightTicketPDF(ticketData);
+
+    return pdfPath;
+  } catch (error) {
+    console.error("Error generating flight ticket PDF:", error);
+    throw new Error("Failed to generate flight ticket PDF");
+  }
+};
+
+// Utility function for executing database queries
+const queryPromise = (sql, values) => {
+  return new Promise((resolve, reject) => {
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
 
 //controllers
 
@@ -136,8 +239,6 @@ app.get("/logout", (req, res) => {
   return res.json({ status: "success" });
 });
 
-// Flight details
-
 // Route to store flight details
 app.post("/storeFlightDetails", (req, res) => {
   const flightData = req.body;
@@ -183,15 +284,14 @@ app.post("/storeFlightDetails", (req, res) => {
 // Route to store traveler details
 app.post("/storeTravelerDetails", (req, res) => {
   const travelers = req.body.travelers;
-  
 
   // Prepare SQL query
-  const sql = "INSERT INTO travellers ( register_id ,name, age, gender ) VALUES ( ?, ?, ?, ?)";
+  const sql = "INSERT INTO travellers (register_id, name, age, gender) VALUES (?, ?, ?, ?)";
 
   // Insert each traveler into the database
   travelers.forEach((traveler) => {
     const { user_id, name, age, gender } = traveler;
-    const values = [ user_id ,name, age, gender];
+    const values = [user_id, name, age, gender];
     db.query(sql, values, (err, result) => {
       if (err) {
         console.log(err);
@@ -203,7 +303,6 @@ app.post("/storeTravelerDetails", (req, res) => {
   return res.json({ status: "success" });
 });
 
-// fetching user bookings
 // Route to fetch booking flight details by user id
 app.get("/booking-flights/:userId", (req, res) => {
   const userId = req.params.userId;
@@ -211,16 +310,49 @@ app.get("/booking-flights/:userId", (req, res) => {
   db.query(sql, [userId], (err, data) => {
     if (err) {
       console.error("Error fetching booking flight details:", err);
-      return res
-        .status(500)
-        .json({ error: "Failed to fetch booking flight details" });
+      return res.status(500).json({ error: "Failed to fetch booking flight details" });
     } else {
       return res.json(data);
     }
   });
 });
 
+const path = require('path');
+
+// Route to generate and download flight ticket PDF
+app.get("/generate-and-download-ticket/:userId", (req, res) => {
+  const userId = req.params.userId;
+  generateAndDownloadTicket(userId)
+    .then((pdfPath) => {
+      const fileName = 'flight_ticket.pdf'; // File name for the downloaded PDF
+
+      // Read the file contents
+      fs.readFile(pdfPath, (err, data) => {
+        if (err) {
+          console.error("Error reading flight ticket PDF:", err);
+          res.status(500).json({ error: "Failed to read flight ticket PDF" });
+        } else {
+          // Set headers to force browser to download the file as an attachment
+          res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+          res.setHeader('Content-Type', 'application/pdf');
+
+          // Send the file data as a response
+          res.send(data);
+
+          // Delete the generated PDF file after sending
+          fs.unlinkSync(pdfPath);
+        }
+      });
+    })
+    .catch((error) => {
+      console.error("Error generating flight ticket PDF:", error);
+      res.status(500).json({ error: "Failed to generate flight ticket PDF" });
+    });
+});
+
+
+
 app.listen(
   process.env.PORT || 8080,
-  console.log(`server running on port ${process.env.PORT}`)
+  console.log(`server running on port ${process.env.PORT || 8080}`)
 );

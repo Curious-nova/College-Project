@@ -111,9 +111,9 @@ export const Cab = () => {
         <SmallBottom />
         <Bottom />
       </div>
-      {error && <p>Error: {error}</p>}
-      {cabData && <SearchBox handle={handleSearch} />}
-      <Bottom data={data} bookData={bookData} />
+      {/* {error && <p>Error: {error}</p>}
+      {cabData && <SearchBox handle={handleSearch} />} */}
+      {/* <Bottom data={data} bookData={bookData} /> */}
     </div>
   );
 };

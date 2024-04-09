@@ -60,7 +60,7 @@ export const Icondiv = () => {
             <span>
               <LocalTaxiIcon style={{ fontSize: 40, padding: 4 }}></LocalTaxiIcon>
             </span>
-            <p>Cabs</p>
+            <p>Intercity</p>
           </Link>
         </div>
       </div>

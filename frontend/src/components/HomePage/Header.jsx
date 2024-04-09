@@ -143,7 +143,7 @@ export const Header = () => {
                 style={{ fontSize: 30, padding: 4 }}
               ></LocalTaxiIcon>
             </span>
-            <p>Cabs</p>
+            <p>Intercity</p>
           </div>
         </div>
       </div>

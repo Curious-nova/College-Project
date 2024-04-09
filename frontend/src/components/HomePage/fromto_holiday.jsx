@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Fromtocss } from "./Fromtocss";
 
-export const HolidayPackageSearchForm = ({ handleChange }) => {
+export const FromtoHoliday = ({ handleChange }) => {
   const [cities, setCities] = useState([]);
-  const [departureDate, setDepartureDate] = useState("");
-  const [guests, setGuests] = useState(1); // Initial number of guests set to 1
+  const [budget, setBudget] = useState("1,30000");
+  const [travelMonth, setTravelMonth] = useState("5-2024");
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -21,16 +21,14 @@ export const HolidayPackageSearchForm = ({ handleChange }) => {
     fetchCities();
   }, []);
 
-  const handleDepartureDateChange = (e) => {
-    const selectedDate = e.target.value;
-    setDepartureDate(selectedDate);
-    handleChange({ target: { name: "departureDate", value: selectedDate } });
+  const handleBudgetChange = (e) => {
+    setBudget(e.target.value);
+    handleChange(e); // Pass the event to handleChange
   };
 
-  const handleGuestsChange = (e) => {
-    const selectedGuests = parseInt(e.target.value);
-    setGuests(selectedGuests);
-    handleChange({ target: { name: "guests", value: selectedGuests } });
+  const handleTravelMonthChange = (e) => {
+    setTravelMonth(e.target.value);
+    handleChange(e); // Pass the event to handleChange
   };
 
   return (
@@ -40,7 +38,7 @@ export const HolidayPackageSearchForm = ({ handleChange }) => {
           <h3>DESTINATION</h3>
           <select onChange={handleChange} name="destination">
             {cities.map((city) => (
-              <option value={city.IATA_code} key={city.IATA_code}>
+              <option value={city.city_name} key={city.IATA_code}>
                 {city.city_name}
               </option>
             ))}
@@ -49,18 +47,23 @@ export const HolidayPackageSearchForm = ({ handleChange }) => {
       </div>
       <div className="fromtodiv2">
         <div>
-          <h3>DEPARTURE DATE</h3>
-          <input type="date" className="date" onChange={handleDepartureDateChange} name="departureDate" />
+          <h3>BUDGET PER PERSON</h3>
+          <select onChange={handleBudgetChange} name="budget">
+            <option defaultChecked value="">Select</option>
+            <option value="1,30000">Less than 30,000</option>
+            <option value="30000,100000">30,000 - 1,00,000</option>
+            <option value="100000,200000">1,00,000 - 2,00,000</option>
+            <option value="200000,0">More than 2,00,000</option>
+          </select>
         </div>
         <div>
-          <h3>GUESTS</h3>
-          <select onChange={handleGuestsChange} name="guests">
-            {[...Array(10).keys()].map((num) => (
-              <option value={num + 1} key={num + 1}>
-                {num + 1}
-              </option>
-            ))}
-          </select>
+          <h3>TRAVEL MONTH</h3>
+          <input
+            type="month"
+            className="date"
+            onChange={handleTravelMonthChange}
+            name="travelMonth"
+          />
         </div>
       </div>
     </Fromtocss>

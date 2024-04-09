@@ -12,7 +12,7 @@ import { Login } from "./components/login/Login";
 import { Hotel } from "./components/SearchPage/hotel_search";
 import { Cab } from "./components/SearchPage/cab";
 import { Bus } from "./components/SearchPage/bus_search";
-import { HolidayPackages } from "./components/SearchPage/holiday";
+import { Holiday } from "./components/SearchPage/holiday";
 import ProtectedRoutes from "./components/ProtectedRoute/ProtectedRoutes";
 import UserProfile from "./components/UserProfile/UserProfile";
 
@@ -30,7 +30,7 @@ function App() {
 
           <Route path="/train-search" element={<TrainBooking />} />
           <Route path="/payment" exact element={<PaymentPage />} />
-          <Route path="/holiday-package-search" element={<HolidayPackages />} />
+          <Route path="/holiday-package-search" element={<Holiday/>} />
           <Route path="/hotel-search" element={<Hotel />} />
           <Route path="/cab-search" element={<Cab />} />
           <Route path="/bus-search" element={<Bus />} />

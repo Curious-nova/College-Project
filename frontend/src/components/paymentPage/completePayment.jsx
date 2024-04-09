@@ -4,6 +4,7 @@ import bmtLogo from "./bmt_logo.jpg";
 import { Link, useLocation } from "react-router-dom";
 import paymentdone from "./payment_done_image.png";
 import paymentdonesound from "./payment_complete_sound.mp3";
+
 const PaymentContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -141,11 +142,11 @@ export const PaymentPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [ticketDownloaded, setTicketDownloaded] = useState(false);
 
   const handlePayment = () => {
     setLoading(true);
     console.log("Payment started...");
-  
     // Get traveler data from local storage
     const travelerData = JSON.parse(localStorage.getItem("travellers"));
     const userId = JSON.parse(localStorage.getItem("userId")); // Get the userId from localStorage
@@ -154,7 +155,6 @@ export const PaymentPage = () => {
       ...traveler,
       user_id: userId,
     }));
-  
     // Send traveler data to backend
     fetch("http://localhost:8080/storeTravelerDetails", {
       method: "POST",
@@ -198,7 +198,6 @@ export const PaymentPage = () => {
         setLoading(false);
       });
   };
-  
 
   useEffect(() => {
     if (!loading && paymentCompleted) {
@@ -208,6 +207,30 @@ export const PaymentPage = () => {
       console.log("Sound played!");
     }
   }, [loading, paymentCompleted]);
+
+  const handleDownloadTicket = () => {
+    const userId = JSON.parse(localStorage.getItem("userId")); // Get userId from localStorage
+    fetch(`http://localhost:8080/generate-and-download-ticket/${userId}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to download ticket");
+        }
+        return response.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "flight_ticket.pdf");
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+        setTicketDownloaded(true);
+      })
+      .catch((error) => {
+        console.error("Error downloading ticket:", error);
+      });
+  };
 
   return (
     <PaymentContainer>
@@ -227,7 +250,6 @@ export const PaymentPage = () => {
           <Subtitle>Processing Payment</Subtitle>
           <Subtitle className="d-flex justify-content-center align-items-center flex-column mt-5">
             <div class="spinner-border mt-2" role="status"></div>
-
             <div>
               <span class="sr-only">Payment Processing ...</span>
             </div>
@@ -243,6 +265,11 @@ export const PaymentPage = () => {
               <AdditionalText>
                 Your booking is confirmed. Thank you for choosing BookMyTrip.
               </AdditionalText>
+              {!ticketDownloaded && (
+                <Button onClick={handleDownloadTicket}>
+                  Download Ticket
+                </Button>
+              )}
             </PaymentDoneContainer>
           ) : (
             <Button onClick={handlePayment}>Complete Payment</Button>

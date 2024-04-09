@@ -1,27 +1,19 @@
-import React, { useState, useEffect } from "react";
-import axios from 'axios';
+// Bus.jsx
+import React, { useState } from "react";
 import { Header } from "../HomePage/Header";
 import { Navbar } from "../HomePage/Navbar";
 import { Icondiv } from "../HomePage/Icondiv";
 import { Bookingcss } from "../HomePage/Bookingcss";
-import { FareTypes } from "../HomePage/FareTypes";
+import { BusSearchForm } from "../HomePage/fromto_bus"; // Updated import
 import { Bottom } from "../HomePage/Bottom";
-// import { Login } from "../login/Login";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { SmallBottom } from "../HomePage/SmallBottom";
 import bmtLogo from './bmt_logo.jpg';
-import { SearchBox } from "../SearchPage/SearchBox";
-import { BusSearchForm } from "../HomePage/fromto_bus"; // Change to BusSearchForm component
 
-export const Bus = () => { // Change component name to Bus
-  const [data, setData] = useState([]);
+export const Bus = () => {
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropLocation, setDropLocation] = useState("");
   const [travelDate, setTravelDate] = useState("");
-  const [passengers, setPassengers] = useState(1);
-
-  const [busData, setBusData] = useState(null); // Change variable name to busData
-  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,62 +21,27 @@ export const Bus = () => { // Change component name to Bus
       setPickupLocation(value);
     } else if (name === "dropLocation") {
       setDropLocation(value);
-    } else if (name === "travelDate") {
+    } else if (name === "departureDate") {
       setTravelDate(value);
-    } else if (name === "passengers") {
-      setPassengers(value);
     }
   };
 
-  const handleSearch = async () => {
-    try {
-      const busData = await searchBuses(pickupLocation, dropLocation, travelDate, passengers); // Change function name to searchBuses
-      setData(busData.data); // Change variable name to busData
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setError(error.message);
-    }
+  const handleSearch = () => {
+    const formattedDate = travelDate.split("-").reverse().join("-"); // Reformat date to dd-mm-yyyy
+    const randomNumber1 = Math.ceil((Math.random() * 10) + 1); // Generate random numbers
+    const randomNumber2 = randomNumber1 + 2;
+    console.log(randomNumber1);
+    console.log(randomNumber2);
+    const url = `https://www.abhibus.com/bus_search/${pickupLocation}/${randomNumber1}/${dropLocation}/${randomNumber2}/${formattedDate}/O`;
+    window.location.href = url; // Redirect using window.location.href
   };
-
-  const searchBuses = async (pickupLocation, dropLocation, travelDate, passengers) => {
-    const options = {
-      method: 'GET',
-      url: 'YOUR_BUS_API_ENDPOINT', // Update with your bus API endpoint
-      params: { pickupLocation, dropLocation, travelDate, passengers },
-      headers: {
-        'Authorization': 'Bearer YOUR_AUTH_TOKEN',
-        'Content-Type': 'application/json'
-      }
-    };
-
-    try {
-      const response = await axios.request(options);
-      console.log(response.data);
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      throw new Error("Failed to fetch bus data");
-    }
-  };
-
-  const bookData = () => {
-    localStorage.setItem("buy", JSON.stringify(data));
-  };
-
-  useEffect(() => {
-    // You can add any necessary logic here for initial data fetching
-  }, []);
 
   return (
     <div>
-      <Header></Header>
+      <Header />
       <Navbar>
         <div className="topdiv">
-          <img
-            className="laltain"
-            src=""
-            alt=""
-          />
+          <img className="laltain" src="" alt="" />
           <Link to="/">
             <img 
               src={bmtLogo}
@@ -93,13 +50,10 @@ export const Bus = () => { // Change component name to Bus
               style={{width: '130px', height: '80px', paddingTop: '20px'}}
             />
           </Link>
-          <div className="login">
-            {/* <Login /> */}
-          </div>
         </div>
         <Bookingcss>
           <Icondiv className="icondiv"></Icondiv>
-          <BusSearchForm handleChange={handleChange} /> 
+          <BusSearchForm handleChange={handleChange} />
         </Bookingcss>
         <div className="button">
           <button onClick={handleSearch}>
@@ -111,9 +65,6 @@ export const Bus = () => { // Change component name to Bus
         <SmallBottom />
         <Bottom />
       </div>
-      {error && <p>Error: {error}</p>}
-      {busData && <SearchBox handle={handleSearch} />} {/* Change to busData */}
-      <Bottom data={data} bookData={bookData} /> {/* Change to busData */}
     </div>
   );
 };
