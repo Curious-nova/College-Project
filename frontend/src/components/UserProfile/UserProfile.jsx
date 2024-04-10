@@ -69,6 +69,16 @@ function UserProfile() {
                   Add Booking
                 </button>
               </Link>
+
+              {/* Button to view added bookings */}
+              <Link to="/display-added-booking">
+                <button
+                  className="btn"
+                  style={{ backgroundColor: "blue", color: "white" }}
+                >
+                  View Added Bookings
+                </button>
+              </Link>
             </div>
           </div>
         </div>

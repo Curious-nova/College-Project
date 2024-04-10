@@ -17,6 +17,7 @@ import ProtectedRoutes from "./components/ProtectedRoute/ProtectedRoutes";
 import UserProfile from "./components/UserProfile/UserProfile";
 import Bookings from "./components/UserProfile/Bookings";
 import {AddBooking} from "./components/UserProfile/addedBooking";
+import {DisplayAddedBooking} from "./components/UserProfile/DisplayAddedBooking";
 function App() {
   return (
     <div>
@@ -37,6 +38,7 @@ function App() {
           <Route path="/bus-search" element={<Bus />} />
           <Route path="/bookings" element={<Bookings/>}/>
           <Route path="/add-booking" element={<AddBooking/>} />
+          <Route path="/display-added-booking" element={<DisplayAddedBooking/>} />
         </Route>
       </Routes>
     </div>

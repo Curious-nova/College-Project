@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Toast } from "react-bootstrap";
 
 export const AddBooking = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ export const AddBooking = () => {
     additional_info: "",
   });
 
+  const [showToast, setShowToast] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -26,11 +29,10 @@ export const AddBooking = () => {
       .post("http://localhost:8080/add-booking", formData)
       .then((res) => {
         console.log("Booking added successfully:", res.data);
-        // Optionally, redirect or show a success message to the user
+        setShowToast(true);
       })
       .catch((err) => {
         console.error("Error adding booking:", err);
-        // Optionally, show an error message to the user
       });
   };
 
@@ -183,6 +185,23 @@ export const AddBooking = () => {
           </button>
         </div>
       </form>
+      <Toast
+        show={showToast}
+        onClose={() => setShowToast(false)}
+        delay={3000}
+        autohide
+        style={{
+          position: "fixed",
+          bottom: "40px", // Increased gap from bottom
+          right: "10px",
+          minWidth: "300px", // Increased toast size
+          backgroundColor: "white", // Solid white background
+          boxShadow: "0 2px 4px rgba(0,0,0,.1)", // Adding shadow
+          fontSize: 15, 
+        }}
+      >
+        <Toast.Body>Booking Details Added Successfully</Toast.Body>
+      </Toast>
     </div>
   );
 };

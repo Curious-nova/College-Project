@@ -347,6 +347,22 @@ app.post("/add-booking", (req, res) => {
   });
 });
 
+// Route to fetch third-party booking details by user id
+app.get("/third-party-bookings/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const sql = "SELECT * FROM third_party_bookings WHERE register_id = ?";
+  db.query(sql, [userId], (err, data) => {
+    if (err) {
+      console.error("Error fetching third-party booking details:", err);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch third-party booking details" });
+    } else {
+      return res.json(data);
+    }
+  });
+});
+
 
 app.get("/logout", (req, res) => {
   res.clearCookie("token");
