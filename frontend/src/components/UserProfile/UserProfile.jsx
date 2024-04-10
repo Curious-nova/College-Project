@@ -10,8 +10,9 @@ function UserProfile() {
 
   useEffect(() => {
     // Fetch user details
+    const userId = localStorage.getItem("userId"); // Fetch userId from localStorage
     axios
-      .get("http://localhost:8080/")
+      .get(`http://localhost:8080/getuserdetails?id=${userId}`) // Send request to getuserdetails route with userId as query parameter
       .then((res) => {
         console.log("User details response:", res.data); // Log the response data
         setUserName(res.data.name);
@@ -22,7 +23,7 @@ function UserProfile() {
         console.error("Error fetching user details:", err);
         setLoading(false); // Set loading to false on error
       });
-  }, [userName, email]); // Include userName and email in the dependency array
+  }, []); // Empty dependency array because we only want this effect to run once on component mount
 
   if (loading) {
     return <div>Loading...</div>; // Display loading indicator while fetching data
@@ -57,6 +58,15 @@ function UserProfile() {
                     <FaBookOpen />
                   </span>
                   My Bookings
+                </button>
+              </Link>
+              
+              <Link to="/add-booking">
+                <button
+                  className="btn"
+                  style={{ backgroundColor: "green", color: "white" }}
+                >
+                  Add Booking
                 </button>
               </Link>
             </div>

@@ -27,7 +27,7 @@ app.use(cookieParser());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "ash1006@",
   database: "travel_booking_system",
   authPlugin: "mysql_native_password",
 });
@@ -278,6 +278,75 @@ app.get("/", verifyUser, (req, res) => {
     }
   });
 });
+
+app.get("/getuserdetails", (req, res) => {
+  const userId = req.query.id; // Assuming the frontend will pass user ID as a query parameter
+
+  const sql = "SELECT username, email FROM register WHERE id = ?";
+  db.query(sql, [userId], (err, data) => {
+    if (err) {
+      console.error("Error fetching user details:", err);
+      return res.status(500).json({ error: "Failed to fetch user details" });
+    }
+    if (data.length > 0) {
+      const userDetails = {
+        name: data[0].username,
+        email: data[0].email,
+      };
+      return res.json({ status: "success", ...userDetails });
+    } else {
+      return res.status(404).json({ error: "User not found" });
+    }
+  });
+});
+
+// Route to store third-party booking details
+app.post("/add-booking", (req, res) => {
+  const bookingData = req.body;
+
+  // Extract booking data from the request body
+  const {
+    register_id,
+    booking_date,
+    departure_city,
+    arrival_city,
+    departure_datetime,
+    arrival_datetime,
+    num_travelers,
+    booking_company,
+    booking_type,
+    total_price,
+    additional_info,
+  } = bookingData;
+
+  // Prepare SQL query
+  const sql =
+    "INSERT INTO third_party_bookings (register_id, booking_date, departure_city, arrival_city, departure_datetime, arrival_datetime, num_travelers, booking_company, booking_type, total_price, additional_info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  const values = [
+    register_id,
+    booking_date,
+    departure_city,
+    arrival_city,
+    departure_datetime,
+    arrival_datetime,
+    num_travelers,
+    booking_company,
+    booking_type,
+    total_price,
+    additional_info,
+  ];
+
+  // Insert booking data into the database
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ Error: "Failed to store booking details" });
+    } else {
+      return res.json({ status: "success" });
+    }
+  });
+});
+
 
 app.get("/logout", (req, res) => {
   res.clearCookie("token");

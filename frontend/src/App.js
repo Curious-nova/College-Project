@@ -16,7 +16,7 @@ import { Holiday } from "./components/SearchPage/holiday";
 import ProtectedRoutes from "./components/ProtectedRoute/ProtectedRoutes";
 import UserProfile from "./components/UserProfile/UserProfile";
 import Bookings from "./components/UserProfile/Bookings";
-
+import {AddBooking} from "./components/UserProfile/addedBooking";
 function App() {
   return (
     <div>
@@ -36,6 +36,7 @@ function App() {
           <Route path="/cab-search" element={<Cab />} />
           <Route path="/bus-search" element={<Bus />} />
           <Route path="/bookings" element={<Bookings/>}/>
+          <Route path="/add-booking" element={<AddBooking/>} />
         </Route>
       </Routes>
     </div>

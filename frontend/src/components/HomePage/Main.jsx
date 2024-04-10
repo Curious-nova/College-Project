@@ -147,7 +147,7 @@ export const Main = () => {
             <Link to="/search">
               {" "}
               <span>
-                <FaSearch />
+                {/* <FaSearch /> */}
               </span>{" "}
               SEARCH
             </Link>

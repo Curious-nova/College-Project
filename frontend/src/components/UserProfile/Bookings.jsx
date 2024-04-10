@@ -18,6 +18,20 @@ const Bookings = () => {
       });
   }, []);
 
+  // Function to format date time to IST
+  const formatDateTimeToIST = (dateTimeString) => {
+    const options = {
+      timeZone: "Asia/Kolkata",
+      hour12: true,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    };
+    return new Date(dateTimeString).toLocaleString("en-IN", options);
+  };
+
   return (
     <div className="container ">
       <div className="d-flex justify-content-between align-items-center mt-3 text-primary">
@@ -55,10 +69,10 @@ const Bookings = () => {
             <tr key={booking.register_id}>
               <td>{booking.arrival}</td>
               <td>{booking.arrival_city}</td>
-              <td>{booking.arrival_time}</td>
+              <td>{formatDateTimeToIST(booking.arrival_time)}</td>
               <td>{booking.departure}</td>
               <td>{booking.departure_city}</td>
-              <td>{booking.departure_time}</td>
+              <td>{formatDateTimeToIST(booking.departure_time)}</td>
               <td>{booking.airline}</td>
               <td>{booking.price}</td>
               <td>{booking.num_travelers}</td>
@@ -74,3 +88,4 @@ const Bookings = () => {
 };
 
 export default Bookings;
+
