@@ -27,7 +27,7 @@ app.use(cookieParser());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "ash1006@",
+  password: "",
   database: "travel_booking_system",
   authPlugin: "mysql_native_password",
 });
@@ -362,7 +362,6 @@ app.get("/third-party-bookings/:userId", (req, res) => {
     }
   });
 });
-
 
 app.get("/logout", (req, res) => {
   res.clearCookie("token");

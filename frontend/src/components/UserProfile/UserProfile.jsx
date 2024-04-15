@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { FaBookOpen } from "react-icons/fa";
+import { IoMdAdd } from "react-icons/io";
+import { CiViewBoard } from "react-icons/ci";
 
 function UserProfile() {
   const [userName, setUserName] = useState("");
@@ -48,7 +50,8 @@ function UserProfile() {
           <div className="p-3 py-5">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h4 className="text-right">Profile Settings</h4>
-
+            </div>
+            <div className="d-flex justify-content-between align-items-center">
               <Link to="/bookings">
                 <button
                   className="btn"
@@ -60,17 +63,19 @@ function UserProfile() {
                   My Bookings
                 </button>
               </Link>
-              
+
               <Link to="/add-booking">
                 <button
                   className="btn"
                   style={{ backgroundColor: "green", color: "white" }}
                 >
+                  <span>
+                    <IoMdAdd />
+                  </span>{" "}
                   Add Booking
                 </button>
               </Link>
 
-              {/* Button to view added bookings */}
               <Link to="/display-added-booking">
                 <button
                   className="btn"

@@ -146,10 +146,7 @@ export const Main = () => {
           <button onClick={addLocal}>
             <Link to="/search">
               {" "}
-              <span>
-                {/* <FaSearch /> */}
-              </span>{" "}
-              SEARCH
+              <span>{/* <FaSearch /> */}</span> SEARCH
             </Link>
           </button>
         </div>

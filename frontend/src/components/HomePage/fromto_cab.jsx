@@ -27,13 +27,17 @@ export const CabSearchForm = ({ handleChange }) => {
   const handlePickupLocationChange = (e) => {
     const selectedLocation = e.target.value;
     setPickupLocation(selectedLocation);
-    handleChange({ target: { name: "pickupLocation", value: selectedLocation } });
+    handleChange({
+      target: { name: "pickupLocation", value: selectedLocation },
+    });
   };
 
   const handleDropoffLocationChange = (e) => {
     const selectedLocation = e.target.value;
     setDropoffLocation(selectedLocation);
-    handleChange({ target: { name: "dropoffLocation", value: selectedLocation } });
+    handleChange({
+      target: { name: "dropoffLocation", value: selectedLocation },
+    });
   };
 
   const handlePickupDateChange = (e) => {
@@ -51,7 +55,9 @@ export const CabSearchForm = ({ handleChange }) => {
   const handlePassengersChange = (e) => {
     const selectedPassengers = parseInt(e.target.value);
     setNumPassengers(selectedPassengers);
-    handleChange({ target: { name: "numPassengers", value: selectedPassengers } });
+    handleChange({
+      target: { name: "numPassengers", value: selectedPassengers },
+    });
   };
 
   return (
@@ -61,7 +67,7 @@ export const CabSearchForm = ({ handleChange }) => {
           <h3>PICKUP LOCATION</h3>
           <select onChange={handlePickupLocationChange} name="pickupLocation">
             {cities.map((city) => (
-              <option value={city.IATA_code} key={city.IATA_code}>
+              <option value={city.city_name} key={city.IATA_code}>
                 {city.city_name}
               </option>
             ))}
@@ -71,14 +77,14 @@ export const CabSearchForm = ({ handleChange }) => {
           <h3>DROPOFF LOCATION</h3>
           <select onChange={handleDropoffLocationChange} name="dropoffLocation">
             {cities.map((city) => (
-              <option value={city.IATA_code} key={city.IATA_code}>
+              <option value={city.city_name} key={city.IATA_code}>
                 {city.city_name}
               </option>
             ))}
           </select>
         </div>
       </div>
-      <div className="fromtodiv2">
+      {/* <div className="fromtodiv2">
         <div>
           <h3>PICKUP DATE</h3>
           <input type="date" className="date" onChange={handlePickupDateChange} name="pickupDate" />
@@ -97,7 +103,7 @@ export const CabSearchForm = ({ handleChange }) => {
             ))}
           </select>
         </div>
-      </div>
+      </div> */}
     </Fromtocss>
   );
 };

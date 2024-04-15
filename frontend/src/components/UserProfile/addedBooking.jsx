@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Toast } from "react-bootstrap";
+import { Link } from "react-router-dom";
+
 
 export const AddBooking = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +27,7 @@ export const AddBooking = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     axios
       .post("http://localhost:8080/add-booking", formData)
       .then((res) => {
@@ -179,10 +182,13 @@ export const AddBooking = () => {
             ></textarea>
           </div>
         </div>
-        <div className="d-grid">
+        <div className="d-flex justify-content-evenly align-items-center">
           <button type="submit" className="btn btn-primary">
             Submit
           </button>
+          <Link to="/user">
+            <button className="btn btn-success">Go Back</button>
+          </Link>
         </div>
       </form>
       <Toast
@@ -197,7 +203,7 @@ export const AddBooking = () => {
           minWidth: "300px", // Increased toast size
           backgroundColor: "white", // Solid white background
           boxShadow: "0 2px 4px rgba(0,0,0,.1)", // Adding shadow
-          fontSize: 15, 
+          fontSize: 15,
         }}
       >
         <Toast.Body>Booking Details Added Successfully</Toast.Body>
