@@ -27,7 +27,7 @@ app.use(cookieParser());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "",
+  password: "qwer1234",
   database: "travel_booking_system",
   authPlugin: "mysql_native_password",
 });

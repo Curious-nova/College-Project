@@ -18,6 +18,7 @@ export const Hotel = () => {
   const [checkInDate, setCheckInDate] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
   const [guests, setGuests] = useState(1); // Initial number of guests set to 1
+  const [destination, setDestination] = useState(""); // State for destination
 
   const [hotelData, setHotelData] = useState(null);
   const [error, setError] = useState(null);
@@ -30,37 +31,18 @@ export const Hotel = () => {
       setCheckOutDate(value);
     } else if (name === "guests") {
       setGuests(value);
+    } else if (name === "destination") { // Handle destination change
+      setDestination(value);
     }
   };
 
   const handleSearch = async () => {
     try {
-      const hotelData = await searchHotels(checkInDate, checkOutDate, guests);
-      setData(hotelData.data); // Assuming the response structure is similar to trainData
+      // Redirect to the specified link including destination parameter
+      window.location.href = `https://www.easemytrip.com/hotels/hotels-in-${destination}/?e=2024416201539&city=${destination}&cin=${checkInDate}&cOut=${checkOutDate}&Hotel=NA&Rooms=1&pax=${guests}`;
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error redirecting:", error);
       setError(error.message);
-    }
-  };
-
-  const searchHotels = async (checkInDate, checkOutDate, guests) => {
-    const options = {
-      method: 'GET',
-      url: 'YOUR_HOTEL_API_ENDPOINT', // Update this with your hotel API endpoint
-      params: { checkInDate, checkOutDate, guests }, // Update parameter names accordingly
-      headers: {
-        'Authorization': 'Bearer YOUR_AUTH_TOKEN', // Include necessary authorization token
-        'Content-Type': 'application/json'
-      }
-    };
-
-    try {
-      const response = await axios.request(options);
-      console.log(response.data);
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      throw new Error("Failed to fetch hotel data");
     }
   };
 

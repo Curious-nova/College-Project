@@ -47,7 +47,7 @@ export const HotelSearchForm = ({ handleChange }) => {
           <h3>DESTINATION</h3>
           <select onChange={handleChange} name="destination">
             {cities.map((city) => (
-              <option value={city.IATA_code} key={city.IATA_code}>
+              <option value={city.city_name} key={city.IATA_code}>
                 {city.city_name}
               </option>
             ))}
@@ -57,11 +57,11 @@ export const HotelSearchForm = ({ handleChange }) => {
       <div className="fromtodiv2">
         <div>
           <h3>CHECK-IN DATE</h3>
-          <input type="date" className="date" onChange={handleCheckInDateChange} name="checkInDate" />
+          <input type="date" className="date" onChange={handleCheckInDateChange} name="checkInDate" value={checkInDate} />
         </div>
         <div>
           <h3>CHECK-OUT DATE</h3>
-          <input type="date" className="date" onChange={handleCheckOutDateChange} name="checkOutDate" />
+          <input type="date" className="date" onChange={handleCheckOutDateChange} name="checkOutDate" value={checkOutDate} />
         </div>
         <div>
           <h3>GUESTS</h3>
