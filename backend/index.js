@@ -6,7 +6,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const fs = require("fs");
-const PDFDocument = require("pdfkit");
+const ejs = require('ejs');
+const htmlToPdf = require('html-pdf');
 
 const salt = 10;
 dotenv.config();
@@ -27,7 +28,7 @@ app.use(cookieParser());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "qwer1234",
+  password: "ash1006@",
   database: "travel_booking_system",
   authPlugin: "mysql_native_password",
 });
@@ -41,110 +42,38 @@ db.connect((err) => {
 });
 
 // PDF Generator function
-const generateFlightTicketPDF = (ticketData) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const doc = new PDFDocument();
+async function generateFlightTicketPDF(ticketData) {
+  try {
+    // Compile EJS template
+    const templatePath = 'flight_ticket_template.ejs';
+    const html = await ejs.renderFile(templatePath, { ticketData });
 
-      // Set up PDF stream
-      const pdfPath = `flight_ticket.pdf`;
-      const pdfStream = fs.createWriteStream(pdfPath);
+    // Options for PDF generation
+    const options = {
+      format: 'Letter',
+      border: {
+        top: '0.5in',
+        right: '0.5in',
+        bottom: '0.5in',
+        left: '0.5in'
+      }
+    };
 
-      // Pipe the PDF document to the file stream
-      doc.pipe(pdfStream);
-
-      // Add title
-      doc.fontSize(20).text("Flight Ticket", { align: "center" }).moveDown();
-
-      // Add flight details section
-      doc.fontSize(16).text("Flight Details", { underline: true }).moveDown();
-      doc.fontSize(12).text(`Airline: ${ticketData.flight.airline}`).moveDown();
-      doc
-        .fontSize(12)
-        .text(
-          `Departure: ${ticketData.flight.departure} (${ticketData.flight.departure_city})`
-        )
-        .moveDown();
-      doc
-        .fontSize(12)
-        .text(`Departure Time: ${ticketData.flight.departure_time}`)
-        .moveDown();
-      doc
-        .fontSize(12)
-        .text(
-          `Arrival: ${ticketData.flight.arrival} (${ticketData.flight.arrival_city})`
-        )
-        .moveDown();
-      doc
-        .fontSize(12)
-        .text(`Arrival Time: ${ticketData.flight.arrival_time}`)
-        .moveDown();
-
-      // Add travelers details section
-      doc.fontSize(16).text("Travelers", { underline: true }).moveDown();
-      ticketData.travelers.forEach((traveler, index) => {
-        doc
-          .fontSize(12)
-          .text(`Traveler ${index + 1}:`)
-          .moveDown();
-        doc.fontSize(12).text(`Name: ${traveler.name}`).moveDown();
-        doc.fontSize(12).text(`Age: ${traveler.age}`).moveDown();
-        doc.fontSize(12).text(`Gender: ${traveler.gender}`).moveDown();
-        doc.moveDown();
+    // Generate PDF from HTML
+    const pdfPath = 'flight_ticket.pdf';
+    await new Promise((resolve, reject) => {
+      htmlToPdf.create(html, options).toFile(pdfPath, (err, res) => {
+        if (err) reject(err);
+        else resolve(res);
       });
+    });
 
-      // Add baggage details section
-      doc
-        .fontSize(16)
-        .text("Baggage Allowance", { underline: true })
-        .moveDown();
-      doc
-        .fontSize(12)
-        .text(
-          `Carry-on Baggage Weight: ${ticketData.flight.carryon_baggage_weight} kg`
-        )
-        .moveDown();
-      doc
-        .fontSize(12)
-        .text(
-          `Checked Baggage Weight: ${ticketData.flight.checkin_baggage_weight} kg`
-        )
-        .moveDown();
-
-      // Add total price section
-      doc.fontSize(16).text("Total Price", { underline: true }).moveDown();
-      doc
-        .fontSize(12)
-        .text(`Price per traveler: ${ticketData.flight.price} INR`)
-        .moveDown();
-      doc
-        .fontSize(12)
-        .text(`Number of Travelers: ${ticketData.flight.num_travelers}`)
-        .moveDown();
-      doc
-        .fontSize(12)
-        .text(`Total Price: ${ticketData.flight.total_price} INR`)
-        .moveDown();
-
-      // Add footer with thank you message
-      doc
-        .fontSize(12)
-        .text(
-          "Thank you for choosing our airline! We look forward to serving you on your upcoming flight."
-        )
-        .moveDown();
-
-      // Finalize the PDF document
-      doc.end();
-
-      // Resolve with the path to the generated PDF
-      resolve(pdfPath);
-    } catch (error) {
-      // Reject if an error occurs during PDF generation
-      reject(error);
-    }
-  });
-};
+    return pdfPath;
+  } catch (error) {
+    console.error('Error generating flight ticket PDF:', error);
+    throw new Error('Failed to generate flight ticket PDF');
+  }
+}
 
 // Flight Ticket Generator function
 const generateAndDownloadTicket = async (userId) => {

@@ -51,11 +51,11 @@ function UserProfile() {
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h4 className="text-right">Profile Settings</h4>
             </div>
-            <div className="d-flex justify-content-between align-items-center">
+            <div className="d-flex justify-content-between align-items-center mb-3">
               <Link to="/bookings">
                 <button
                   className="btn"
-                  style={{ backgroundColor: "purple", color: "white" }}
+                  style={{ backgroundColor: "#800080", color: "white", padding: '5px 20px' }}
                 >
                   <span className="me-2">
                     <FaBookOpen />
@@ -67,7 +67,7 @@ function UserProfile() {
               <Link to="/add-booking">
                 <button
                   className="btn"
-                  style={{ backgroundColor: "green", color: "white" }}
+                  style={{ backgroundColor: "#008000", color: "white", padding: '5px 30px', marginLeft: '25px' }}
                 >
                   <span>
                     <IoMdAdd />
@@ -79,11 +79,26 @@ function UserProfile() {
               <Link to="/display-added-booking">
                 <button
                   className="btn"
-                  style={{ backgroundColor: "blue", color: "white" }}
+                  style={{ backgroundColor: "#0000FF", color: "white", padding: '5px 10px', marginLeft: '25px' }}
                 >
+                  <span>
+                    <CiViewBoard />
+                  </span>{" "}
                   View Added Bookings
                 </button>
               </Link>
+            </div>
+            <div className="mb-3">
+              <h4>About Us</h4>
+              <p className="text-center" style={{ fontSize: '16px', lineHeight: '1.3', textAlign: 'left', color: '#333' }}>
+                Our team worked together on a DBMS group project where we developed a travel management and booking system BookMyTrip. 
+                Using technologies like React.js, Node.js, Express.js, MySQL, Axios, Bootstrap, and Material UI, we created 
+                a practical platform for travel operations. Our project focused on essential features like user authentication, 
+                profile management, and booking functionalities. We aimed to provide users with a straightforward and efficient 
+                solution for planning and managing as well as booking their trips. We would like to acknowledge the guidance and support
+                provided by our professors, Dr. Ravi Bhandari Sir and Dr. Prasun Tripathi Sir, which enabled us to work on this project and 
+                gain valuable experience.
+              </p>
             </div>
           </div>
         </div>

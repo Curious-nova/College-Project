@@ -78,6 +78,7 @@ const Loader = styled.div`
 `;
 
 export const Bottom = ({ data, bookData }) => {
+  console.log(data);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

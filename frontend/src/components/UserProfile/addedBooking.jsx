@@ -41,7 +41,7 @@ export const AddBooking = () => {
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4">Add Booking</h2>
+      <h2 className="mb-4" style={{ color: "#5783db" }}>Add Booking</h2>
       <form onSubmit={handleSubmit}>
         <div className="row">
           <div className="col-md-6 mb-3">

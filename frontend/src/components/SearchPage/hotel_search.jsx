@@ -38,17 +38,30 @@ export const Hotel = () => {
 
   const handleSearch = async () => {
     try {
-      // Redirect to the specified link including destination parameter
-      window.location.href = `https://www.easemytrip.com/hotels/hotels-in-${destination}/?e=2024416201539&city=${destination}&cin=${checkInDate}&cOut=${checkOutDate}&Hotel=NA&Rooms=1&pax=${guests}`;
+      // Format check-in and check-out dates as dd/mm/yyyy
+      const formattedCheckInDate = formatDate(checkInDate);
+      const formattedCheckOutDate = formatDate(checkOutDate);
+      // Redirect to the specified link including destination parameter and formatted dates
+      window.location.href = `https://www.easemytrip.com/hotels/hotels-in-${destination}/?e=2024416201539&city=${destination}&cin=${formattedCheckInDate}&cOut=${formattedCheckOutDate}&Hotel=NA&Rooms=1&pax=${guests}`;
     } catch (error) {
       console.error("Error redirecting:", error);
       setError(error.message);
     }
   };
-
-  const bookData = () => {
-    localStorage.setItem("buy", JSON.stringify(dataa));
+  
+  // Function to format date as dd/mm/yyyy
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
+  
+
+  // const bookData = () => {
+  //   localStorage.setItem("buy", JSON.stringify(dataa));
+  // };
 
   useEffect(() => {
     // You can add any necessary logic here for initial data fetching
@@ -92,7 +105,7 @@ export const Hotel = () => {
       </div>
       {error && <p>Error: {error}</p>}
       {hotelData && <SearchBox handle={handleSearch} />} {/* Update according to your UI */}
-      <Bottom data={dataa} bookData={bookData} />
+      {/* <Bottom data={dataa} bookData={bookData} /> */}
     </div>
   );
 };

@@ -40,7 +40,7 @@ export const Search = () => {
   const searchFlights = async ({ from, to, departureDate, travelClass }) => {
     const options = {
       method: "GET",
-      url: "https://booking-com15.p.rapidapi.com/api/v1/flights/searchFlights",
+      // url: "https://booking-com15.p.rapidapi.com/api/v1/flights/searchFlights",
       params: {
         fromId: from,
         toId: to,
@@ -51,7 +51,7 @@ export const Search = () => {
         currency_code: "INR",
       },
       headers: {
-        "X-RapidAPI-Key": "8b215e6521mshd9f4d8a43ea552fp196c0djsnddb4f9fb3d3f",
+        "X-RapidAPI-Key": "4ec154cc17mshfb1a17a88a74772p159e36jsn6467a42c7d46",
         "X-RapidAPI-Host": "booking-com15.p.rapidapi.com",
       },
     };
