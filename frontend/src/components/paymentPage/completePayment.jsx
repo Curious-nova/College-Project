@@ -149,9 +149,15 @@ export const PaymentPage = () => {
   };
 
   const handlePayment = () => {
+    const flightData = JSON.parse(localStorage.getItem("buy"));
+    if (!flightData || Object.keys(flightData).length === 0) {
+      console.error("No flight data found in local storage.");
+      return;
+    }
+
     setLoading(true);
     console.log("Payment started...");
-    
+
     // Generate and store PNR
     const pnr = generatePNR();
     localStorage.setItem("ticket_id", pnr);
@@ -179,8 +185,6 @@ export const PaymentPage = () => {
           throw new Error("Failed to store traveler details");
         }
         console.log("Traveler details stored successfully");
-        // Get flight data from local storage
-        const flightData = JSON.parse(localStorage.getItem("buy"));
         // Include travelers key in flightData object
         flightData.travelers = travelerData;
         flightData.user_id = userId; // Add userId to flightData
@@ -203,6 +207,7 @@ export const PaymentPage = () => {
           setLoading(false);
           setPaymentCompleted(true);
           console.log("Payment completed!");
+          localStorage.removeItem("buy"); // Remove the 'buy' data from local storage
         }, 3000); // Retaining the 3-second delay
       })
       .catch((error) => {
@@ -248,7 +253,6 @@ export const PaymentPage = () => {
         setLoading(false); // Set loading state to false after download process completes or encounters an error
       });
   };
-  
 
   return (
     <PaymentContainer>
@@ -272,7 +276,7 @@ export const PaymentPage = () => {
           </AdditionalText>
           {!ticketDownloaded ? (
             <Button onClick={handleDownloadTicket} disabled={loading}>
-              {loading ? <div class="spinner-border mt-2" role="status"></div> : "Download Ticket"}
+              {loading ? <div className="spinner-border mt-2" role="status"></div> : "Download Ticket"}
             </Button>
           ) : null}
         </PaymentDoneContainer>
@@ -282,9 +286,9 @@ export const PaymentPage = () => {
             <SectionContainer>
               <Subtitle>Processing Payment</Subtitle>
               <Subtitle className="d-flex justify-content-center align-items-center flex-column mt-5">
-                <div class="spinner-border mt-2" role="status"></div>
+                <div className="spinner-border mt-2" role="status"></div>
                 <div>
-                  <span class="sr-only">Payment Processing ...</span>
+                  <span className="sr-only">Payment Processing ...</span>
                 </div>
               </Subtitle>
               <ProcessingIcon />
@@ -302,5 +306,4 @@ export const PaymentPage = () => {
       </Link>
     </PaymentContainer>
   );
-  
 };
