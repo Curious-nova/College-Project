@@ -50,6 +50,7 @@ const Bookings = () => {
       <table className="table">
         <thead>
           <tr>
+            <th style={{ color: "purple" }}>PNR No.</th>
             <th style={{ color: "purple" }}>Arrival</th>
             <th style={{ color: "purple" }}>Arrival City</th>
             <th style={{ color: "purple" }}>Arrival Time</th>
@@ -67,6 +68,7 @@ const Bookings = () => {
         <tbody>
           {bookings.map((booking) => (
             <tr key={booking.register_id}>
+              <td>{booking.ticket_id}</td>
               <td>{booking.arrival}</td>
               <td>{booking.arrival_city}</td>
               <td>{formatDateTimeToIST(booking.arrival_time)}</td>

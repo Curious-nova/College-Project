@@ -22,7 +22,7 @@
       padding: 20px;
       background-color: #fff;
       border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px #2d2c2cbb;
     }
 
     .header {
@@ -34,8 +34,8 @@
     }
 
     .header img {
-      width: 100px;
-      height: 100px;
+      width: 180px;
+      height: 150px;
       border-radius: 50%; /* Add rounded corners to the image */
       object-fit: cover; /* Ensure the image covers the entire space */
       margin-right: 20px;
@@ -44,13 +44,13 @@
     .title {
       font-size: 24px;
       font-weight: bold;
-      margin: 10px 0;
+      margin: 10px;
     }
 
     .title1 {
       font-size: 20px;
       font-weight: bold;
-      margin: 10px 0;
+      margin: 10px;
     }
 
     .section {
@@ -73,7 +73,7 @@
       margin-top: 30px;
       text-align: center;
       font-size: 14px;
-      color: #666;
+      color: #515050;
     }
   </style>
 </head>
@@ -91,6 +91,7 @@
       <div class="section-title">Flight Details</div>
       <div class="content">
         <!-- Add flight details content here -->
+        <p>PNR Number: <strong><%= ticketData.ticketId %></strong></p>
         <p>Airline: <strong><%= ticketData.flight.airline %></strong></p>
         <p>Departure: <strong><%= ticketData.flight.departure %> (<%= ticketData.flight.departure_city %>)</strong></p>
         <p>Departure Time: <strong><%= ticketData.flight.departure_time %></strong></p>
@@ -132,7 +133,7 @@
     </div>
 
     <div class="footer">
-      Thank you for choosing our airline! We look forward to serving you on your upcoming flight.
+      Thank you for choosing BookMyTrip! We look forward to serving you on your upcoming Journey.
     </div>
   </div>
 </body>

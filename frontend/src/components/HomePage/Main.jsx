@@ -50,6 +50,8 @@ export const Main = () => {
       .get("http://localhost:8080/logout", { withCredentials: true })
       .then((res) => {
         if (res.data.status === "success") {
+          // Clear userData from localStorage
+          localStorage.removeItem("userData");
           setAuth(false); // Set auth state to false upon successful logout
           navigate("/"); // Navigate to the homepage
         } else {
@@ -57,10 +59,10 @@ export const Main = () => {
         }
       })
       .catch((err) => {
-        console.log("Error during logout:", err); // Handle logout error
+        console.error("Error during logout:", err); // Handle logout error
       });
   };
-
+  
   useEffect(() => {
     axios
       .get("http://localhost:8080/", { withCredentials: true })

@@ -144,9 +144,19 @@ export const PaymentPage = () => {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [ticketDownloaded, setTicketDownloaded] = useState(false);
 
+  const generatePNR = () => {
+    return Math.floor(10000 + Math.random() * 90000);
+  };
+
   const handlePayment = () => {
     setLoading(true);
     console.log("Payment started...");
+    
+    // Generate and store PNR
+    const pnr = generatePNR();
+    localStorage.setItem("ticket_id", pnr);
+    console.log("PNR generated");
+
     // Get traveler data from local storage
     const travelerData = JSON.parse(localStorage.getItem("travellers"));
     const userId = JSON.parse(localStorage.getItem("userId")); // Get the userId from localStorage
@@ -154,6 +164,7 @@ export const PaymentPage = () => {
     const travelersWithUserId = travelerData.map((traveler) => ({
       ...traveler,
       user_id: userId,
+      ticket_id: pnr,
     }));
     // Send traveler data to backend
     fetch("http://localhost:8080/storeTravelerDetails", {
@@ -173,6 +184,7 @@ export const PaymentPage = () => {
         // Include travelers key in flightData object
         flightData.travelers = travelerData;
         flightData.user_id = userId; // Add userId to flightData
+        flightData.ticket_id = pnr; // Add ticket_id to flightData
         // Send flight data to backend
         return fetch("http://localhost:8080/storeFlightDetails", {
           method: "POST",
@@ -200,7 +212,7 @@ export const PaymentPage = () => {
   };
 
   useEffect(() => {
-    if (!loading && paymentCompleted) {
+    if (!loading && paymentCompleted && !ticketDownloaded) {
       // Play sound effect upon completion of payment process
       const audio = new Audio(paymentdonesound);
       audio.play();
@@ -209,8 +221,10 @@ export const PaymentPage = () => {
   }, [loading, paymentCompleted]);
 
   const handleDownloadTicket = () => {
+    setLoading(true); // Set loading state to true when download ticket button is clicked
     const userId = JSON.parse(localStorage.getItem("userId")); // Get userId from localStorage
-    fetch(`http://localhost:8080/generate-and-download-ticket/${userId}`)
+    const ticketId = JSON.parse(localStorage.getItem("ticket_id")); // Get ticket_id from localStorage
+    fetch(`http://localhost:8080/generate-and-download-ticket/${userId}/${ticketId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to download ticket");
@@ -229,8 +243,12 @@ export const PaymentPage = () => {
       })
       .catch((error) => {
         console.error("Error downloading ticket:", error);
+      })
+      .finally(() => {
+        setLoading(false); // Set loading state to false after download process completes or encounters an error
       });
   };
+  
 
   return (
     <PaymentContainer>
@@ -245,32 +263,32 @@ export const PaymentPage = () => {
         <Subtitle>Number of Travellers</Subtitle>
         <Text>Total Travellers: {numberOfTravellers}</Text>
       </SectionContainer>
-      {loading ? (
-        <SectionContainer>
-          <Subtitle>Processing Payment</Subtitle>
-          <Subtitle className="d-flex justify-content-center align-items-center flex-column mt-5">
-            <div class="spinner-border mt-2" role="status"></div>
-            <div>
-              <span class="sr-only">Payment Processing ...</span>
-            </div>
-          </Subtitle>
-          <ProcessingIcon />
-        </SectionContainer>
+      {paymentCompleted ? (
+        <PaymentDoneContainer>
+          <PaymentDoneImage src={paymentdone} alt="Payment Done" />
+          <PaymentDoneText>Payment Successful!</PaymentDoneText>
+          <AdditionalText>
+            Your booking is confirmed. Thank you for choosing BookMyTrip.
+          </AdditionalText>
+          {!ticketDownloaded ? (
+            <Button onClick={handleDownloadTicket} disabled={loading}>
+              {loading ? <div class="spinner-border mt-2" role="status"></div> : "Download Ticket"}
+            </Button>
+          ) : null}
+        </PaymentDoneContainer>
       ) : (
         <>
-          {paymentCompleted ? (
-            <PaymentDoneContainer>
-              <PaymentDoneImage src={paymentdone} alt="Payment Done" />
-              <PaymentDoneText>Payment Successful!</PaymentDoneText>
-              <AdditionalText>
-                Your booking is confirmed. Thank you for choosing BookMyTrip.
-              </AdditionalText>
-              {!ticketDownloaded && (
-                <Button onClick={handleDownloadTicket}>
-                  Download Ticket
-                </Button>
-              )}
-            </PaymentDoneContainer>
+          {loading ? (
+            <SectionContainer>
+              <Subtitle>Processing Payment</Subtitle>
+              <Subtitle className="d-flex justify-content-center align-items-center flex-column mt-5">
+                <div class="spinner-border mt-2" role="status"></div>
+                <div>
+                  <span class="sr-only">Payment Processing ...</span>
+                </div>
+              </Subtitle>
+              <ProcessingIcon />
+            </SectionContainer>
           ) : (
             <Button onClick={handlePayment}>Complete Payment</Button>
           )}
@@ -284,4 +302,5 @@ export const PaymentPage = () => {
       </Link>
     </PaymentContainer>
   );
+  
 };

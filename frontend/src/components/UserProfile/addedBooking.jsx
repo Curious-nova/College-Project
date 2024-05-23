@@ -3,23 +3,27 @@ import axios from "axios";
 import { Toast } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
+// Define the initial state outside the component
+const initialState = {
+  register_id: localStorage.getItem("userId"),
+  ticket_id: "",
+  booking_date: "",
+  departure_city: "",
+  arrival_city: "",
+  departure_datetime: "",
+  arrival_datetime: "",
+  num_travelers: "",
+  booking_company: "",
+  booking_type: "",
+  total_price: "",
+  additional_info: "",
+};
 
 export const AddBooking = () => {
-  const [formData, setFormData] = useState({
-    register_id: localStorage.getItem("userId"),
-    booking_date: "",
-    departure_city: "",
-    arrival_city: "",
-    departure_datetime: "",
-    arrival_datetime: "",
-    num_travelers: "",
-    booking_company: "",
-    booking_type: "",
-    total_price: "",
-    additional_info: "",
-  });
+  const [formData, setFormData] = useState(initialState);
 
-  const [showToast, setShowToast] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,14 +32,44 @@ export const AddBooking = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const {
+      ticket_id,
+      booking_date,
+      departure_city,
+      arrival_city,
+      departure_datetime,
+      arrival_datetime,
+      num_travelers,
+      booking_type,
+      total_price,
+    } = formData;
+
+    // Check if required fields are not null
+    if (
+      !ticket_id ||
+      !booking_date ||
+      !departure_city ||
+      !arrival_city ||
+      !departure_datetime ||
+      !arrival_datetime ||
+      !num_travelers ||
+      !booking_type ||
+      !total_price
+    ) {
+      setShowErrorToast(true);
+      return;
+    }
+
     axios
       .post("http://localhost:8080/add-booking", formData)
       .then((res) => {
         console.log("Booking added successfully:", res.data);
-        setShowToast(true);
+        setShowSuccessToast(true);
+        setFormData(initialState); // Reset form data to initial state
       })
       .catch((err) => {
         console.error("Error adding booking:", err);
+        setShowErrorToast(true);
       });
   };
 
@@ -45,12 +79,26 @@ export const AddBooking = () => {
       <form onSubmit={handleSubmit}>
         <div className="row">
           <div className="col-md-6 mb-3">
+            <label htmlFor="ticket_id" className="form-label">
+              Ticket ID<span style={{ color: "red" }}>*</span>:
+            </label>
+            <input
+              type="number"
+              className="form-control border-dark"
+              id="ticket_id"
+              name="ticket_id"
+              value={formData.ticket_id}
+              onChange={handleChange}
+              max="999999999999999" // Max value for up to 15 digits
+            />
+          </div>
+          <div className="col-md-6 mb-3">
             <label htmlFor="departure_city" className="form-label">
-              Departure City:
+              Departure City<span style={{ color: "red" }}>*</span>:
             </label>
             <input
               type="text"
-              className="form-control"
+              className="form-control border-dark"
               id="departure_city"
               name="departure_city"
               value={formData.departure_city}
@@ -59,11 +107,11 @@ export const AddBooking = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label htmlFor="arrival_city" className="form-label">
-              Arrival City:
+              Arrival City<span style={{ color: "red" }}>*</span>:
             </label>
             <input
               type="text"
-              className="form-control"
+              className="form-control border-dark"
               id="arrival_city"
               name="arrival_city"
               value={formData.arrival_city}
@@ -72,11 +120,11 @@ export const AddBooking = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label htmlFor="departure_datetime" className="form-label">
-              Departure Datetime:
+              Departure Datetime<span style={{ color: "red" }}>*</span>:
             </label>
             <input
               type="datetime-local"
-              className="form-control"
+              className="form-control border-dark"
               id="departure_datetime"
               name="departure_datetime"
               value={formData.departure_datetime}
@@ -85,11 +133,11 @@ export const AddBooking = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label htmlFor="arrival_datetime" className="form-label">
-              Arrival Datetime:
+              Arrival Datetime<span style={{ color: "red" }}>*</span>:
             </label>
             <input
               type="datetime-local"
-              className="form-control"
+              className="form-control border-dark"
               id="arrival_datetime"
               name="arrival_datetime"
               value={formData.arrival_datetime}
@@ -98,11 +146,11 @@ export const AddBooking = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label htmlFor="booking_date" className="form-label">
-              Booking Date:
+              Booking Date<span style={{ color: "red" }}>*</span>:
             </label>
             <input
               type="date"
-              className="form-control"
+              className="form-control border-dark"
               id="booking_date"
               name="booking_date"
               value={formData.booking_date}
@@ -111,11 +159,11 @@ export const AddBooking = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label htmlFor="num_travelers" className="form-label">
-              Number of Travelers:
+              Number of Travelers<span style={{ color: "red" }}>*</span>:
             </label>
             <input
               type="number"
-              className="form-control"
+              className="form-control border-dark"
               id="num_travelers"
               name="num_travelers"
               value={formData.num_travelers}
@@ -128,7 +176,7 @@ export const AddBooking = () => {
             </label>
             <input
               type="text"
-              className="form-control"
+              className="form-control border-dark"
               id="booking_company"
               name="booking_company"
               value={formData.booking_company}
@@ -137,10 +185,10 @@ export const AddBooking = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label htmlFor="booking_type" className="form-label">
-              Booking Type:
+              Booking Type<span style={{ color: "red" }}>*</span>:
             </label>
             <select
-              className="form-select"
+              className="form-select border-dark"
               id="booking_type"
               name="booking_type"
               value={formData.booking_type}
@@ -158,11 +206,11 @@ export const AddBooking = () => {
           </div>
           <div className="col-md-6 mb-3">
             <label htmlFor="total_price" className="form-label">
-              Total Price:
+              Total Price<span style={{ color: "red" }}>*</span>:
             </label>
             <input
               type="number"
-              className="form-control"
+              className="form-control border-dark"
               id="total_price"
               name="total_price"
               value={formData.total_price}
@@ -174,7 +222,7 @@ export const AddBooking = () => {
               Additional Information:
             </label>
             <textarea
-              className="form-control"
+              className="form-control border-dark"
               id="additional_info"
               name="additional_info"
               value={formData.additional_info}
@@ -192,21 +240,38 @@ export const AddBooking = () => {
         </div>
       </form>
       <Toast
-        show={showToast}
-        onClose={() => setShowToast(false)}
+        show={showSuccessToast}
+        onClose={() => setShowSuccessToast(false)}
         delay={3000}
         autohide
         style={{
           position: "fixed",
-          bottom: "40px", // Increased gap from bottom
+          bottom: "40px",
           right: "10px",
-          minWidth: "300px", // Increased toast size
-          backgroundColor: "white", // Solid white background
-          boxShadow: "0 2px 4px rgba(0,0,0,.1)", // Adding shadow
+          minWidth: "300px",
+          backgroundColor: "white",
+          boxShadow: "0 2px 4px rgba(0,0,0,.1)",
           fontSize: 15,
         }}
       >
         <Toast.Body>Booking Details Added Successfully</Toast.Body>
+      </Toast>
+      <Toast
+        show={showErrorToast}
+        onClose={() => setShowErrorToast(false)}
+        delay={3000}
+        autohide
+        style={{
+          position: "fixed",
+          bottom: "40px",
+          right: "10px",
+          minWidth: "300px",
+          backgroundColor: "white",
+          boxShadow: "0 2px 4px rgba(0,0,0,.1)",
+          fontSize: 15,
+        }}
+      >
+        <Toast.Body>Please fill in all required fields.</Toast.Body>
       </Toast>
     </div>
   );

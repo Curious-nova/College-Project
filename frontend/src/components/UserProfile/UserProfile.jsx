@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { FaBookOpen } from "react-icons/fa";
 import { IoMdAdd } from "react-icons/io";
 import { CiViewBoard } from "react-icons/ci";
+import axios from "axios"; // Import axios for API calls
 
 function UserProfile() {
   const [userName, setUserName] = useState("");
@@ -11,24 +11,41 @@ function UserProfile() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch user details
-    const userId = localStorage.getItem("userId"); // Fetch userId from localStorage
-    axios
-      .get(`http://localhost:8080/getuserdetails?id=${userId}`) // Send request to getuserdetails route with userId as query parameter
-      .then((res) => {
-        console.log("User details response:", res.data); // Log the response data
-        setUserName(res.data.name);
-        setEmail(res.data.email);
-        setLoading(false); // Set loading to false after data is fetched
-      })
-      .catch((err) => {
+    const storedUserData = localStorage.getItem("userData");
+    if (storedUserData) {
+      try {
+        const parsedData = JSON.parse(storedUserData);
+        // You can add basic data validation here (optional)
+        if (parsedData && parsedData.name && parsedData.email) {
+          setUserName(parsedData.name);
+          setEmail(parsedData.email);
+          setLoading(false); // Data retrieved from localStorage
+          return; // Exit the function if data is valid
+        }
+      } catch (err) {
+        console.error("Error parsing stored user data:", err);
+      }
+    }
+
+    const fetchUserDetails = async () => {
+      const userId = localStorage.getItem("userId"); // Assuming you have userId stored elsewhere
+      try {
+        const response = await axios.get(`http://localhost:8080/getuserdetails?id=${userId}`);
+        console.log("User details response:", response.data);
+        setUserName(response.data.name);
+        setEmail(response.data.email);
+        localStorage.setItem("userData", JSON.stringify(response.data));
+      } catch (err) {
         console.error("Error fetching user details:", err);
-        setLoading(false); // Set loading to false on error
-      });
-  }, []); // Empty dependency array because we only want this effect to run once on component mount
+      } finally {
+        setLoading(false); // Set loading to false after data is fetched/attempted
+      }
+    };
+    fetchUserDetails();
+  }, []); // Empty dependency array for initial storage check only
 
   if (loading) {
-    return <div>Loading...</div>; // Display loading indicator while fetching data
+    return <div>Loading...</div>;
   }
 
   return (
@@ -75,7 +92,6 @@ function UserProfile() {
                   Add Booking
                 </button>
               </Link>
-
               <Link to="/display-added-booking">
                 <button
                   className="btn"
@@ -108,3 +124,4 @@ function UserProfile() {
 }
 
 export default UserProfile;
+

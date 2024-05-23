@@ -40,7 +40,7 @@ export const Search = () => {
   const searchFlights = async ({ from, to, departureDate, travelClass }) => {
     const options = {
       method: "GET",
-      // url: "https://booking-com15.p.rapidapi.com/api/v1/flights/searchFlights",
+      url: "https://booking-com15.p.rapidapi.com/api/v1/flights/searchFlights",
       params: {
         fromId: from,
         toId: to,

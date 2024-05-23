@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import bmtLogo from './bmt_logo.jpg';
 import { Link } from "react-router-dom";
+import { Toast } from "react-bootstrap";
 
 // Styled components
 const CheckoutContainer = styled.div`
@@ -119,6 +120,8 @@ export const Checkout = () => {
     return storedTravellers ? JSON.parse(storedTravellers) : [{ name: "", age: "", gender: "" }];
   });
 
+  const [showToast, setShowToast] = useState(false);
+
   useEffect(() => {
     const pricePerTravel = selectedFlight?.priceBreakdown.total.units || 0;
     const totalPrice = pricePerTravel * travellerDetails.length;
@@ -130,6 +133,10 @@ export const Checkout = () => {
   }, [travellerDetails]);
 
   const handleAddTraveller = () => {
+    if (travellerDetails.length >= 9) {
+      setShowToast(true);
+      return;
+    }
     setTravellerDetails([...travellerDetails, { name: "", age: "", gender: "" }]);
   };
 
@@ -165,8 +172,8 @@ export const Checkout = () => {
         <Input disabled value={`Arrival: ${formatDateTime(selectedFlight?.segments[0]?.arrivalTime)}`} />
         <Input disabled value={`Airline: ${selectedFlight?.segments[0]?.legs[0]?.carriersData[0]?.name}`} />
         <Input disabled value={`Price: ${selectedFlight?.priceBreakdown.total.units} INR`} />
-        <Input disabled value={`Carry-On Baggage: 7Kgs`}/>
-        <Input disabled value={`Check-In Baggage: 25Kgs`}/>
+        <Input disabled value={`Carry-On Baggage: 7Kgs`} />
+        <Input disabled value={`Check-In Baggage: 25Kgs`} />
       </SectionContainer>
       <SectionContainer>
         <Subtitle>Traveller Details</Subtitle>
@@ -211,6 +218,23 @@ export const Checkout = () => {
       </CheckoutButton>
       </Link>
 
+      <Toast
+        show={showToast}
+        onClose={() => setShowToast(false)}
+        delay={3000}
+        autohide
+        style={{
+          position: "fixed",
+          bottom: "40px",
+          right: "10px",
+          minWidth: "300px",
+          backgroundColor: "white",
+          boxShadow: "0 2px 4px rgba(0,0,0,.1)",
+          fontSize: 15,
+        }}
+      >
+        <Toast.Body>Cannot add more than 9 travelers.</Toast.Body>
+      </Toast>
     </CheckoutContainer>
   );
 };

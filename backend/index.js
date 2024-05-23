@@ -16,7 +16,7 @@ const app = express();
 app.use(
   cors({
     origin: ["http://localhost:3000"],
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
@@ -47,7 +47,6 @@ async function generateFlightTicketPDF(ticketData) {
     // Compile EJS template
     const templatePath = 'flight_ticket_template.ejs';
     const html = await ejs.renderFile(templatePath, { ticketData });
-
     // Options for PDF generation
     const options = {
       format: 'Letter',
@@ -76,19 +75,20 @@ async function generateFlightTicketPDF(ticketData) {
 }
 
 // Flight Ticket Generator function
-const generateAndDownloadTicket = async (userId) => {
+const generateAndDownloadTicket = async (userId, ticketId) => {
   try {
     // Query database to retrieve flight and traveler data
     const flightDataQuery =
-      "SELECT * FROM booked_flights WHERE register_id = ?";
-    const travelerDataQuery = "SELECT * FROM travellers WHERE register_id = ?";
+      "SELECT * FROM booked_flights WHERE register_id = ? AND ticket_id = ?";
+    const travelerDataQuery = "SELECT * FROM travellers WHERE register_id = ? AND ticket_id = ?";
     const [flightData, travelerData] = await Promise.all([
-      queryPromise(flightDataQuery, [userId]),
-      queryPromise(travelerDataQuery, [userId]),
+      queryPromise(flightDataQuery, [userId, ticketId]),
+      queryPromise(travelerDataQuery, [userId, ticketId]),
     ]);
 
     // Format data for PDF generation
     const ticketData = {
+      ticketId: ticketId,
       flight: flightData[0], // Assuming there's only one flight associated with the register_id
       travelers: travelerData,
     };
@@ -235,6 +235,7 @@ app.post("/add-booking", (req, res) => {
 
   // Extract booking data from the request body
   const {
+    ticket_id,
     register_id,
     booking_date,
     departure_city,
@@ -250,8 +251,9 @@ app.post("/add-booking", (req, res) => {
 
   // Prepare SQL query
   const sql =
-    "INSERT INTO third_party_bookings (register_id, booking_date, departure_city, arrival_city, departure_datetime, arrival_datetime, num_travelers, booking_company, booking_type, total_price, additional_info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO third_party_bookings (ticket_id, register_id, booking_date, departure_city, arrival_city, departure_datetime, arrival_datetime, num_travelers, booking_company, booking_type, total_price, additional_info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   const values = [
+    ticket_id,
     register_id,
     booking_date,
     departure_city,
@@ -292,6 +294,77 @@ app.get("/third-party-bookings/:userId", (req, res) => {
   });
 });
 
+
+app.put("/updateBooking/:ticketId", (req, res) => {
+  const ticketId = req.params.ticketId;
+  const { track_id, userId } = req.query; // Extract track_id and userId from the query parameters
+  const bookingData = req.body;
+
+  // Extract booking data from the request body
+  const {
+    booking_date,
+    departure_city,
+    arrival_city,
+    departure_datetime,
+    arrival_datetime,
+    num_travelers,
+    booking_company,
+    booking_type,
+    total_price,
+    additional_info,
+  } = bookingData;
+
+  // Prepare SQL query
+  const sql =
+    "UPDATE third_party_bookings SET booking_date = ?, departure_city = ?, arrival_city = ?, departure_datetime = ?, arrival_datetime = ?, num_travelers = ?, booking_company = ?, booking_type = ?, total_price = ?, additional_info = ? WHERE track_id = ? AND register_id = ? AND ticket_id = ?";
+  const values = [
+    booking_date,
+    departure_city,
+    arrival_city,
+    departure_datetime,
+    arrival_datetime,
+    num_travelers,
+    booking_company,
+    booking_type,
+    total_price,
+    additional_info,
+    track_id,
+    userId,
+    ticketId,
+  ];
+
+  // Update booking data in the database
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Error updating booking:", err);
+      return res.status(500).json({ error: "Failed to update booking" });
+    } else {
+      return res.json({ status: "success" });
+    }
+  });
+});
+
+
+app.delete("/deleteBooking/:ticketId", (req, res) => {
+  const ticketId = req.params.ticketId;
+  const { track_id, userId } = req.query; // Extract track_id and userId from the query parameters
+
+  // Prepare SQL query
+  const sql = "DELETE FROM third_party_bookings WHERE track_id = ? AND register_id = ?  AND ticket_id = ?" ;
+  const values = [track_id, userId, ticketId];
+
+  // Delete booking data from the database
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Error deleting booking:", err);
+      return res.status(500).json({ error: "Failed to delete booking" });
+    } else {
+      return res.json({ status: "success" });
+    }
+  });
+});
+
+
 app.get("/logout", (req, res) => {
   res.clearCookie("token");
   return res.json({ status: "success" });
@@ -313,9 +386,11 @@ app.post("/storeFlightDetails", (req, res) => {
   const departure_time = flightData.segments[0].departureTime;
   const airline = flightData.segments[0].legs[0].carriersData[0].name; // Assuming the first carrier as the airline
   const register_id = flightData.user_id;
+  const ticket_id = flightData.ticket_id;
   const sql =
-    "INSERT INTO booked_flights (register_id, arrival, arrival_city, arrival_time, departure, departure_city, departure_time, airline, price, num_travelers, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO booked_flights (ticket_id, register_id, arrival, arrival_city, arrival_time, departure, departure_city, departure_time, airline, price, num_travelers, total_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   const values = [
+    ticket_id,
     register_id,
     arrival,
     arrival_city,
@@ -339,18 +414,19 @@ app.post("/storeFlightDetails", (req, res) => {
   });
 });
 
+
 // Route to store traveler details
 app.post("/storeTravelerDetails", (req, res) => {
   const travelers = req.body.travelers;
 
   // Prepare SQL query
   const sql =
-    "INSERT INTO travellers (register_id, name, age, gender) VALUES (?, ?, ?, ?)";
+    "INSERT INTO travellers (ticket_id, register_id, name, age, gender) VALUES (?, ?, ?, ?, ?)";
 
   // Insert each traveler into the database
   travelers.forEach((traveler) => {
-    const { user_id, name, age, gender } = traveler;
-    const values = [user_id, name, age, gender];
+    const { ticket_id, user_id, name, age, gender } = traveler;
+    const values = [ticket_id, user_id, name, age, gender];
     db.query(sql, values, (err, result) => {
       if (err) {
         console.log(err);
@@ -381,9 +457,10 @@ app.get("/booking-flights/:userId", (req, res) => {
 const path = require("path");
 
 // Route to generate and download flight ticket PDF
-app.get("/generate-and-download-ticket/:userId", (req, res) => {
+app.get("/generate-and-download-ticket/:userId/:ticketId", (req, res) => {
   const userId = req.params.userId;
-  generateAndDownloadTicket(userId)
+  const ticketId = req.params.ticketId;
+  generateAndDownloadTicket(userId, ticketId)
     .then((pdfPath) => {
       const fileName = "flight_ticket.pdf"; // File name for the downloaded PDF
 
