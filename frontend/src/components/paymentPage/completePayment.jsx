@@ -207,7 +207,7 @@ export const PaymentPage = () => {
           setLoading(false);
           setPaymentCompleted(true);
           console.log("Payment completed!");
-          localStorage.removeItem("buy"); // Remove the 'buy' data from local storage
+          // localStorage.removeItem("buy"); // Remove the 'buy' data from local storage
         }, 3000); // Retaining the 3-second delay
       })
       .catch((error) => {
