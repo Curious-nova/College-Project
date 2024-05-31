@@ -8,6 +8,9 @@ const cookieParser = require("cookie-parser");
 const fs = require("fs");
 const ejs = require('ejs');
 const htmlToPdf = require('html-pdf');
+const nodemailer = require("nodemailer");
+const cron = require('node-cron');
+
 
 const salt = 10;
 dotenv.config();
@@ -23,8 +26,8 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-//DB connection
 
+//DB connection
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -40,6 +43,8 @@ db.connect((err) => {
     console.log("DB connected successfully");
   }
 });
+
+
 
 // PDF Generator function
 async function generateFlightTicketPDF(ticketData) {
@@ -118,27 +123,223 @@ const queryPromise = (sql, values) => {
 
 //controllers
 
-app.post("/register", (req, res) => {
-  bcrypt.hash(req.body.password.toString(), salt, (err, hashedPassword) => {
+// Setup nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+
+app.post("/send-otp", (req, res) => {
+  const email = req.body.email;
+  const checkEmailQuery = "SELECT email FROM register WHERE email = ?";
+
+  db.query(checkEmailQuery, [email], (err, result) => {
     if (err) {
       console.log(err);
-      return res.json({ Error: "Failed to hash" });
-    }
+      return res.json({ Error: "Database error" });
+    } 
+    if (result.length > 0) {
+      return res.json({ Error: "Email already registered. Please login." });
+    } 
 
-    const sql =
-      "INSERT INTO register (`username`, `email`, `password`) VALUES (?, ?, ?)";
-    const values = [req.body.username, req.body.email, hashedPassword];
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    db.query(sql, values, (err, result) => {
+    // Store OTP in the database
+    const storeOtpQuery = "INSERT INTO otp_store (email, otp) VALUES (?, ?)";
+    db.query(storeOtpQuery, [email, otp], (err, result) => {
       if (err) {
         console.log(err);
-        return res.json({ Error: "Failed to Register" });
-      } else {
-        return res.json({ status: "success" });
+        return res.json({ Error: "Database error" });
       }
+
+      // Send OTP email
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your OTP Code',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd;">
+            <div style="text-align: center;">
+              <img src="https://i.imgur.com/CUfYqLm.jpeg" alt="BookMyTrip Logo" style="max-width: 100px; margin-bottom: 20px;">
+            </div>
+            <h2 style="text-align: center; color: #333;">Verify your email address</h2>
+            <p>You need to verify your email address to continue using your account. Enter the following code to verify your email address:</p>
+            <h1 style="text-align: center; color: #333;">${otp}</h1>
+            <p style="text-align: center; color: #777;">This OTP is valid for 5 minutes.</p>
+            <hr>
+            <p style="color: #777; font-size: 12px; text-align: center;">
+              If you did not request this code, please ignore this email.
+            </p>
+          </div>
+        `,
+      };
+
+      transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          console.log(err);
+          return res.json({ Error: "Failed to send OTP" });
+        } else {
+          console.log('Email sent: ' + info.response);
+          return res.json({ status: "success" });
+        }
+      });
     });
   });
 });
+
+
+app.post("/verify-otp", (req, res) => {
+  const { email, username, password, otp } = req.body;
+
+  // Check OTP in the database
+  const checkOtpQuery = "SELECT otp, created_at FROM otp_store WHERE email = ? ORDER BY created_at DESC LIMIT 1";
+  db.query(checkOtpQuery, [email], (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ Error: "Database error" });
+    }
+    if (result.length === 0 || result[0].otp !== otp) {
+      return res.json({ Error: "Invalid OTP" });
+    }
+
+    // Check if OTP is expired
+    const otpTimestamp = new Date(result[0].created_at);
+    const currentTime = new Date();
+    const timeDifference = Math.floor((currentTime - otpTimestamp) / 1000); // in seconds
+
+    if (timeDifference > 300) { // 5 minutes = 300 seconds
+      return res.json({ Error: "OTP expired" });
+    }
+
+    bcrypt.hash(password.toString(), salt, (err, hashedPassword) => {
+      if (err) {
+        console.log(err);
+        return res.json({ Error: "Failed to hash password" });
+      }
+
+      const sql = "INSERT INTO register (`username`, `email`, `password`) VALUES (?, ?, ?)";
+      const values = [username, email, hashedPassword];
+
+      db.query(sql, values, (err, result) => {
+        if (err) {
+          console.log(err);
+          return res.json({ Error: "Failed to register" });
+        } else {
+          // Remove OTP from store
+          const deleteOtpQuery = "DELETE FROM otp_store WHERE email = ?";
+          db.query(deleteOtpQuery, [email], (err, result) => {
+            if (err) {
+              console.log(err);
+            }
+          });
+          return res.json({ status: "success" });
+        }
+      });
+    });
+  });
+});
+
+
+app.post("/resend-otp", (req, res) => {
+  const email = req.body.email;
+  const checkEmailQuery = "SELECT email FROM otp_store WHERE email = ?";
+
+  db.query(checkEmailQuery, [email], (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({ Error: "Database error" });
+    }
+    if (result.length === 0) {
+      return res.json({ Error: "Session Timed Out! Please Register Again." });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Update OTP and created_at in the database
+    const updateOtpQuery = "UPDATE otp_store SET otp = ?, created_at = NOW() WHERE email = ?";
+    db.query(updateOtpQuery, [otp, email], (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.json({ Error: "Database error" });
+      }
+
+      // Send OTP email
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your New OTP Code',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd;">
+            <div style="text-align: center;">
+              <img src="https://i.imgur.com/CUfYqLm.jpeg" alt="BookMyTrip Logo" style="max-width: 100px; margin-bottom: 20px;">
+            </div>
+            <h2 style="text-align: center; color: #333;">Verify your email address</h2>
+            <p>You need to verify your email address to continue using your account. Enter the following code to verify your email address:</p>
+            <h1 style="text-align: center; color: #333;">${otp}</h1>
+            <p style="text-align: center; color: #777;">This OTP is valid for 5 minutes.</p>
+            <hr>
+            <p style="color: #777; font-size: 12px; text-align: center;">
+              If you did not request this code, please ignore this email.
+            </p>
+          </div>
+        `,
+      };
+
+      transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          console.log(err);
+          return res.json({ Error: "Failed to send OTP" });
+        } else {
+          console.log('Email sent: ' + info.response);
+          return res.json({ status: "success" });
+        }
+      });
+    });
+  });
+});
+
+
+
+const deleteExpiredOtps = () => {
+  const deleteExpiredOtpQuery = "DELETE FROM otp_store WHERE created_at < NOW() - INTERVAL 5 MINUTE";
+  db.query(deleteExpiredOtpQuery, (err, result) => {
+    if (err) {
+      console.log("Error deleting expired OTPs:", err);
+    } else {
+      console.log("Expired OTPs cleaned up");
+
+      // Check if there are any remaining expired OTPs
+      const checkRemainingOtpsQuery = "SELECT COUNT(*) AS count FROM otp_store WHERE created_at < NOW() - INTERVAL 5 MINUTE";
+      db.query(checkRemainingOtpsQuery, (err, result) => {
+        if (err) {
+          console.log("Error checking remaining expired OTPs:", err);
+        } else {
+          const remainingOtpsCount = result[0].count;
+          if (remainingOtpsCount === 0) {
+            console.log("No expired OTPs remaining, stopping cron job");
+            return; // Stop the cron job
+          }
+        }
+      });
+    }
+  });
+};
+
+// Initial call to start the cron job
+deleteExpiredOtps();
+
+// Schedule task to run every 10 minutes
+cron.schedule('*/10 * * * *', () => {
+  deleteExpiredOtps();
+});
+
+
 
 app.post("/login", (req, res) => {
   const sql = "SELECT * FROM register where email=?";

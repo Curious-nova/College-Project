@@ -70,20 +70,43 @@ const BookButton = styled.button`
   &:hover {
     background-color: #800080;
   }
- 
 `;
 
 const Loader = styled.div`
   text-align: center;
 `;
 
+const ErrorMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: red;
+  font-size: 18px;
+  margin-top: 20px;
+  height: 75vh; /* Ensures the message is centered vertically within the viewport */
+`;
+
+const NoFlightsFound = styled.p`
+  color: #5f46d8de;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 35px;
+`;
+
 export const Bottom = ({ data, bookData }) => {
   console.log(data);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (data && data.flightOffers) {
-      setLoading(false);
+    if (data) {
+      if (data.error) {
+        setError(data.error);
+        setLoading(false);
+      } else if (data.flightOffers) {
+        setLoading(false);
+      }
     }
   }, [data]);
 
@@ -114,7 +137,17 @@ export const Bottom = ({ data, bookData }) => {
           </div>
         </Loader>
       )}
-      {!loading && (
+      {!loading && error && (
+        <ErrorMessage>
+          {error.code === 'SEARCH_SEARCHFLIGHTS_NO_FLIGHTS_FOUND' ? (
+            <NoFlightsFound>No Flights Found...</NoFlightsFound>
+          ) : (
+            <p>Error: {error.code}</p>
+          )}
+          {/* <p>Type: {error.type}</p> */}
+        </ErrorMessage>
+      )}
+      {!loading && !error && (
         <Style>
           {data?.flightOffers?.map((flightOffer) => (
             <FlightBox key={nanoid(6)}>
